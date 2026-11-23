@@ -196,17 +196,17 @@ Deux nuances que la moyenne cache, et qu'il faut dire :
 
 | Médicament | Molécules du front qu'il domine | Dominé par |
 |---|---:|---:|
-| Paracétamol | **18 / 38** | **0** |
+| Paracétamol | **13 / 25** | **0** |
 | Ibuprofène | 7 | **0** |
 | Pénicilline G | 2 | **0** |
-| Aspirine | 2 | **0** |
-| Caféine | 0 | 12 |
-| Atorvastatine | 0 | 36 |
+| Aspirine | 1 | **0** |
+| Caféine | 0 | 9 |
+| Atorvastatine | 0 | 23 |
 
 **Quatre des six médicaments ne sont dominés par aucune molécule du front.**
 Après 18 000 évaluations, la recherche n'a produit aucune structure qui soit
 à la fois plus proche d'un médicament oral *et* plus facile à synthétiser que
-le paracétamol — lequel domine à lui seul 18 entrées du front.
+le paracétamol — lequel domine à lui seul plus de la moitié du front.
 
 Ce n'est pas un défaut du code : c'est la mesure honnête de ce que vaut le
 générateur, et elle situe la difficulté réelle du problème.
@@ -214,12 +214,17 @@ générateur, et elle situe la difficulté réelle du problème.
 ### 4. Multiobjectif
 
 - Molécules distinctes évaluées par le GA : **5 572**
-- Front de Pareto : **25 molécules distinctes** (38 entrées avant
-  déduplication entre graines — voir « Défaut corrigé » ci-dessous)
+- Front de Pareto : **25 molécules**
 - Hypervolume, référence (0, 0) : **0,674**
 
-L'hypervolume n'est pas affecté par les doublons : une molécule répétée
-n'ajoute aucune aire dominée.
+Chiffres issus de l'exécution après correction des doublons entre graines
+(voir « Défauts révélés par l'exécution » ci-dessous). L'hypervolume, lui,
+n'était pas affecté : une molécule répétée n'ajoute aucune aire dominée.
+
+Les figures, le détail complet et les données brutes sont versionnés dans
+`notebooks/` — `RESULTATS.md`, `mesures.json` et les sept PNG. Le notebook
+est commité **avec ses sorties** : les figures et les tableaux sont visibles
+directement sur GitHub, sans rien exécuter.
 
 ### 5. Où l'algorithme est réellement allé
 
@@ -262,7 +267,7 @@ n'a pas de squelette de Bemis–Murcko.
 | Défaut | Symptôme mesuré | Correction |
 |---|---|---|
 | Molécule vide acceptée comme valide | `TypeError` à la troisième génération : `MolFromSmiles("")` renvoie une molécule sans atome, pas `None` | test du nombre d'atomes dans `para_mol` et dans le calcul des notes |
-| Doublons entre graines | front annoncé à 38 entrées pour 25 molécules ; vérificateur signalant 785 « doublons » sur 6 357, soit exactement 6 357 − 5 572 | déduplication par SMILES canonique avant l'analyse |
+| Doublons entre graines | front annoncé à 38 entrées pour 25 molécules ; vérificateur signalant 785 « doublons » sur 6 357, soit exactement 6 357 − 5 572 | déduplication par SMILES canonique avant l'analyse — après correction : front de 25, et **0 problème** signalé sur 5 572 molécules |
 
 Le second est instructif : **le vérificateur avait raison**. C'est le notebook
 qui lui transmettait la même molécule trouvée par des graines différentes.
