@@ -137,6 +137,10 @@ pytest -q
 RDKit 2026.09.2, selfies 2.1.1 : `pytest -q` sort avec le **code 0**, aucun
 échec ni erreur.
 
+Relancée depuis un clone vierge **après la traduction complète en français**,
+qui a renommé l'intégralité des identifiants : code 0 de nouveau. Le
+renommage n'a donc rien casse.
+
 Reproduction depuis un environnement vierge :
 
 ```bash
