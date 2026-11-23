@@ -1,0 +1,10 @@
+# Versoes travadas: o guia do curso pede instalacao reproduzivel.
+# Atualize os numeros para os que voces realmente instalarem
+# (pip freeze | grep -iE "rdkit|selfies|pytest").
+rdkit==2025.3.6
+selfies==2.2.0
+pytest==8.4.2
+
+# Para o notebook de analise:
+matplotlib==3.10.8
+pandas==2.3.3

@@ -1,0 +1,28 @@
+# Ambientes
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# Segredos
+.env
+
+# Saidas da execucao: reproduziveis a partir do codigo e da semente
+resultados/
+*.jsonl
+
+# Dados baixados: so o script de download e versionado
+data/*
+!data/README.md
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Sistema
+.DS_Store
+Thumbs.db
