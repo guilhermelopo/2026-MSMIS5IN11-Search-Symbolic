@@ -1,76 +1,77 @@
-"""Operadores geneticos sobre cadeias SELFIES.
+"""Operateurs genetiques sur chaines SELFIES.
 
-Todos recebem um `random.Random` explicito em vez de usar o modulo
-`random` global. Sem isso nao ha reprodutibilidade: duas execucoes com a
-mesma semente dariam resultados diferentes se qualquer outra parte do
-programa sorteasse um numero no meio.
+Tous recoivent un `random.Random` explicite au lieu d'utiliser le module
+`random` global. Sans cela, pas de reproductibilite : deux executions avec
+la meme graine donneraient des resultats differents des qu'une autre
+partie du programme tirerait un nombre au milieu.
 
-A validade dos filhos nao e verificada em lugar nenhum -- e garantida
-pela representacao. E esse o ponto do projeto.
+La validite des enfants n'est verifiee nulle part -- elle est garantie par
+la representation. C'est tout l'interet du projet.
 """
 
 from __future__ import annotations
 
 import random
 
-from .representation import alfabeto, fichas
+from .representation import alphabet, jetons
 
 
-def mutar(cadeia: str, rng: random.Random, p: float = 0.15) -> str:
-    """Aplica trocas, insercoes e remocoes ficha a ficha.
+def muter(chaine: str, rng: random.Random, p: float = 0.15) -> str:
+    """Applique substitutions, insertions et suppressions, jeton par jeton.
 
-    Cada ficha sofre, com probabilidade p, uma das tres operacoes
-    (igualmente provaveis entre si):
+    Chaque jeton subit, avec la probabilite p, une des trois operations
+    (equiprobables entre elles) :
 
-      trocar  -> muda um atomo ou uma ligacao
-      inserir -> a molecula cresce
-      remover -> a molecula encolhe
+      substituer -> change un atome ou une liaison
+      inserer    -> la molecule grandit
+      supprimer  -> la molecule retrecit
 
-    Inserir e remover sao indispensaveis. Sem elas, o tamanho da molecula
-    fica travado no tamanho inicial, e o tamanho e um dos descritores que
-    mais pesam no QED.
+    Inserer et supprimer sont indispensables. Sans elles, la taille de la
+    molecule reste figee a la taille initiale, or la taille est un des
+    descripteurs qui pesent le plus dans le QED.
     """
-    alfa = alfabeto()
-    saida: list[str] = []
-    for ficha in fichas(cadeia):
+    alpha = alphabet()
+    sortie: list[str] = []
+    for jeton in jetons(chaine):
         r = rng.random()
         if r < p / 3:
-            saida.append(rng.choice(alfa))
+            sortie.append(rng.choice(alpha))
         elif r < 2 * p / 3:
-            saida.append(rng.choice(alfa))
-            saida.append(ficha)
+            sortie.append(rng.choice(alpha))
+            sortie.append(jeton)
         elif r < p:
             continue
         else:
-            saida.append(ficha)
-    # Remover tudo e possivel quando p e alto; devolver "" quebraria o
-    # decodificador, entao caimos numa ficha unica.
-    return "".join(saida) or rng.choice(alfa)
+            sortie.append(jeton)
+    # Tout supprimer est possible quand p est eleve ; renvoyer "" casserait
+    # le decodeur, on retombe donc sur un jeton unique.
+    return "".join(sortie) or rng.choice(alpha)
 
 
-def cruzar(a: str, b: str, rng: random.Random) -> tuple[str, str]:
-    """Cruzamento de um ponto: corta as duas listas e troca as caudas."""
-    ta, tb = fichas(a), fichas(b)
-    i = rng.randrange(1, max(2, len(ta)))
-    j = rng.randrange(1, max(2, len(tb)))
-    f1 = "".join(ta[:i] + tb[j:])
-    f2 = "".join(tb[:j] + ta[i:])
-    return (f1 or a), (f2 or b)
+def croiser(a: str, b: str, rng: random.Random) -> tuple[str, str]:
+    """Croisement en un point : coupe les deux listes et echange les queues."""
+    ja, jb = jetons(a), jetons(b)
+    i = rng.randrange(1, max(2, len(ja)))
+    j = rng.randrange(1, max(2, len(jb)))
+    e1 = "".join(ja[:i] + jb[j:])
+    e2 = "".join(jb[:j] + ja[i:])
+    return (e1 or a), (e2 or b)
 
 
-def torneio(
+def tournoi(
     pop: list[str],
-    aptidoes: list[float],
+    aptitudes: list[float],
     rng: random.Random,
     k: int = 3,
 ) -> str:
-    """Sorteia k individuos e devolve o melhor deles.
+    """Tire k individus au sort et renvoie le meilleur des k.
 
-    Preferido a roleta por tres motivos praticos: nao se importa com a
-    escala absoluta das notas, a pressao seletiva se ajusta so no k, e nao
-    ha divisao por zero quando todas as aptidoes empatam.
+    Prefere a la roulette pour trois raisons pratiques : il ne depend pas
+    de l'echelle absolue des notes, la pression selective se regle par le
+    seul k, et il n'y a pas de division par zero quand toutes les aptitudes
+    sont egales.
     """
     k = min(k, len(pop))
     indices = rng.sample(range(len(pop)), k)
-    melhor = max(indices, key=lambda i: aptidoes[i])
-    return pop[melhor]
+    meilleur = max(indices, key=lambda i: aptitudes[i])
+    return pop[meilleur]

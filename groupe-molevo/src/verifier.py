@@ -1,18 +1,18 @@
-"""Verificador independente das solucoes produzidas.
+"""Verificateur independant des solutions produites.
 
-Entregavel obrigatorio do curso. A palavra que importa e *independente*:
-este modulo le o registro gravado pela busca e confere tudo por um
-caminho de codigo proprio, sem reaproveitar o cache nem as funcoes de
-aptidao usadas durante a execucao.
+Livrable obligatoire du cours. Le mot qui compte est *independant* : ce
+module lit le registre ecrit par la recherche et revérifie tout par un
+chemin de code propre, sans reutiliser le cache ni les fonctions d'aptitude
+employees pendant l'execution.
 
-O erro que ele existe para pegar e banal e devastador: reportar uma
-molecula com uma nota que nao e a dela. Acontece por um indice trocado ao
-reordenar a populacao, por um cache desatualizado, ou por um registro
-gravado antes da ultima mutacao. O grafico fica bonito e o resultado e
-falso.
+L'erreur qu'il existe pour attraper est banale et devastatrice : rapporter
+une molecule avec une note qui n'est pas la sienne. Cela arrive par un
+indice echange lors d'un tri, par un cache perime, ou par un enregistrement
+ecrit avant la derniere mutation. Le graphique reste beau et le resultat
+est faux.
 
-Uso:
-    python -m src.verifier registro.jsonl
+Utilisation :
+    python -m src.verifier registre.jsonl
 """
 
 from __future__ import annotations
@@ -27,147 +27,149 @@ from rdkit.Chem import QED, RDConfig
 
 RDLogger.DisableLog("rdApp.*")
 
-TOLERANCIA = 1e-6
+TOLERANCE = 1e-6
 
 
 @dataclass(frozen=True)
-class Problema:
-    tipo: str
-    detalhe: str
-    linha: int
+class Probleme:
+    type: str
+    detail: str
+    ligne: int
 
     def __str__(self) -> str:
-        return f"[linha {self.linha}] {self.tipo}: {self.detalhe}"
+        return f"[ligne {self.ligne}] {self.type} : {self.detail}"
 
 
-def _sascorer_proprio():
-    """Carrega o sascorer sem passar pelo modulo objectives.
+def _sascorer_propre():
+    """Charge sascorer sans passer par le module objectives.
 
-    De proposito: se objectives tiver um bug na normalizacao ou no cache,
-    um verificador que o importasse herdaria o mesmo bug e nao veria nada.
+    A dessein : si objectives avait un bug dans la normalisation ou dans le
+    cache, un verificateur qui l'importerait heriterait du meme bug et ne
+    verrait rien.
     """
-    caminho = os.path.join(RDConfig.RDContribDir, "SA_Score")
-    if caminho not in sys.path:
-        sys.path.append(caminho)
+    chemin = os.path.join(RDConfig.RDContribDir, "SA_Score")
+    if chemin not in sys.path:
+        sys.path.append(chemin)
     import sascorer  # noqa: PLC0415
 
     return sascorer
 
 
-def verificar(registro: list[dict]) -> list[Problema]:
-    """Confere um registro de moleculas. Lista vazia significa tudo certo."""
-    sascorer = _sascorer_proprio()
-    problemas: list[Problema] = []
-    vistos: dict[str, int] = {}
+def verifier_registre(registre: list[dict]) -> list[Probleme]:
+    """Verifie un registre de molecules. Liste vide signifie tout bon."""
+    sascorer = _sascorer_propre()
+    problemes: list[Probleme] = []
+    vus: dict[str, int] = {}
 
-    for n, linha in enumerate(registro, start=1):
-        smiles = linha.get("smiles")
+    for n, ligne in enumerate(registre, start=1):
+        smiles = ligne.get("smiles")
         if not smiles:
-            problemas.append(Problema("sem_smiles", repr(linha)[:80], n))
+            problemes.append(Probleme("sans_smiles", repr(ligne)[:80], n))
             continue
 
         mol = Chem.MolFromSmiles(smiles)
         if mol is None:
-            problemas.append(Problema("smiles_ilegivel", smiles, n))
+            problemes.append(Probleme("smiles_illisible", smiles, n))
             continue
 
-        canonico = Chem.MolToSmiles(mol)
-        if canonico != smiles:
-            problemas.append(
-                Problema("smiles_nao_canonico", f"{smiles} -> {canonico}", n)
+        canonique = Chem.MolToSmiles(mol)
+        if canonique != smiles:
+            problemes.append(
+                Probleme("smiles_non_canonique", f"{smiles} -> {canonique}", n)
             )
-        if canonico in vistos:
-            problemas.append(
-                Problema("duplicado", f"{canonico} (ja na linha {vistos[canonico]})", n)
+        if canonique in vus:
+            problemes.append(
+                Probleme("doublon", f"{canonique} (deja ligne {vus[canonique]})", n)
             )
         else:
-            vistos[canonico] = n
+            vus[canonique] = n
 
-        # Ida e volta pela representacao, se a cadeia SELFIES foi gravada.
-        cadeia = linha.get("selfies")
-        if cadeia:
+        # Aller-retour par la representation, si la chaine SELFIES est la.
+        chaine = ligne.get("selfies")
+        if chaine:
             try:
                 import selfies as sf
 
-                volta = Chem.MolFromSmiles(sf.decoder(cadeia))
-                if volta is None or Chem.MolToSmiles(volta) != canonico:
-                    problemas.append(Problema("selfies_divergente", canonico, n))
-            except Exception as erro:  # noqa: BLE001
-                problemas.append(Problema("selfies_ilegivel", f"{cadeia}: {erro}", n))
+                retour = Chem.MolFromSmiles(sf.decoder(chaine))
+                if retour is None or Chem.MolToSmiles(retour) != canonique:
+                    problemes.append(Probleme("selfies_divergent", canonique, n))
+            except Exception as erreur:  # noqa: BLE001
+                problemes.append(
+                    Probleme("selfies_illisible", f"{chaine} : {erreur}", n))
 
-        # Recalculo das notas por caminho proprio.
-        if "qed" in linha:
+        # Recalcul des notes par un chemin propre.
+        if "qed" in ligne:
             qed = float(QED.qed(mol))
-            if abs(qed - float(linha["qed"])) > TOLERANCIA:
-                problemas.append(
-                    Problema("qed_divergente", f"{canonico}: {linha['qed']} != {qed:.6f}", n)
-                )
-        if "sa" in linha:
+            if abs(qed - float(ligne["qed"])) > TOLERANCE:
+                problemes.append(
+                    Probleme("qed_divergent",
+                             f"{canonique} : {ligne['qed']} != {qed:.6f}", n))
+        if "sa" in ligne:
             sa = float(sascorer.calculateScore(mol))
-            if abs(sa - float(linha["sa"])) > TOLERANCIA:
-                problemas.append(
-                    Problema("sa_divergente", f"{canonico}: {linha['sa']} != {sa:.6f}", n)
-                )
-        if "sa" in linha and "sa_norm" in linha:
-            esperado = max(0.0, min(1.0, (10.0 - float(linha["sa"])) / 9.0))
-            if abs(esperado - float(linha["sa_norm"])) > TOLERANCIA:
-                problemas.append(
-                    Problema("sa_norm_divergente", f"{canonico}: {linha['sa_norm']} != {esperado:.6f}", n)
-                )
+            if abs(sa - float(ligne["sa"])) > TOLERANCE:
+                problemes.append(
+                    Probleme("sa_divergent",
+                             f"{canonique} : {ligne['sa']} != {sa:.6f}", n))
+        if "sa" in ligne and "sa_norm" in ligne:
+            attendu = max(0.0, min(1.0, (10.0 - float(ligne["sa"])) / 9.0))
+            if abs(attendu - float(ligne["sa_norm"])) > TOLERANCE:
+                problemes.append(
+                    Probleme("sa_norm_divergent",
+                             f"{canonique} : {ligne['sa_norm']} != {attendu:.6f}", n))
 
-    return problemas
+    return problemes
 
 
-def verificar_frente(frente_declarada: list[dict]) -> list[Problema]:
-    """Confere que a frente de Pareto declarada e mesmo nao dominada."""
-    from .pareto import domina
+def verifier_front(front_declare: list[dict]) -> list[Probleme]:
+    """Verifie que le front de Pareto declare est bien non domine."""
+    from .pareto import domine
 
-    pontos = [(float(d["qed"]), float(d["sa_norm"])) for d in frente_declarada]
-    problemas: list[Problema] = []
-    for i, p in enumerate(pontos):
-        for j, q in enumerate(pontos):
-            if i != j and domina(q, p):
-                problemas.append(
-                    Problema(
-                        "frente_dominada",
-                        f"{frente_declarada[i]['smiles']} e dominada por "
-                        f"{frente_declarada[j]['smiles']}",
+    points = [(float(d["qed"]), float(d["sa_norm"])) for d in front_declare]
+    problemes: list[Probleme] = []
+    for i, p in enumerate(points):
+        for j, q in enumerate(points):
+            if i != j and domine(q, p):
+                problemes.append(
+                    Probleme(
+                        "front_domine",
+                        f"{front_declare[i]['smiles']} est dominee par "
+                        f"{front_declare[j]['smiles']}",
                         i + 1,
                     )
                 )
                 break
-    return problemas
+    return problemes
 
 
-def carregar_jsonl(caminho: str) -> list[dict]:
-    with open(caminho, encoding="utf-8") as f:
-        return [json.loads(linha) for linha in f if linha.strip()]
+def charger_jsonl(chemin: str) -> list[dict]:
+    with open(chemin, encoding="utf-8") as f:
+        return [json.loads(ligne) for ligne in f if ligne.strip()]
 
 
 def main(argv: list[str] | None = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     if not argv:
-        print("uso: python -m src.verifier <registro.jsonl>")
+        print("usage : python -m src.verifier <registre.jsonl>")
         return 2
 
-    registro = carregar_jsonl(argv[0])
-    problemas = verificar(registro)
+    registre = charger_jsonl(argv[0])
+    problemes = verifier_registre(registre)
 
-    print(f"Verificador independente -- {len(registro)} moleculas conferidas")
-    if not problemas:
-        print("OK: 0 problemas.")
+    print(f"Verificateur independant -- {len(registre)} molecules verifiees")
+    if not problemes:
+        print("OK : 0 probleme.")
         return 0
 
-    por_tipo: dict[str, int] = {}
-    for p in problemas:
-        por_tipo[p.tipo] = por_tipo.get(p.tipo, 0) + 1
-    print(f"FALHOU: {len(problemas)} problemas.")
-    for tipo, quantos in sorted(por_tipo.items()):
-        print(f"  {tipo}: {quantos}")
-    for p in problemas[:20]:
+    par_type: dict[str, int] = {}
+    for p in problemes:
+        par_type[p.type] = par_type.get(p.type, 0) + 1
+    print(f"ECHEC : {len(problemes)} problemes.")
+    for type_, combien in sorted(par_type.items()):
+        print(f"  {type_} : {combien}")
+    for p in problemes[:20]:
         print(f"  {p}")
-    if len(problemas) > 20:
-        print(f"  ... e mais {len(problemas) - 20}")
+    if len(problemes) > 20:
+        print(f"  ... et {len(problemes) - 20} de plus")
     return 1
 
 

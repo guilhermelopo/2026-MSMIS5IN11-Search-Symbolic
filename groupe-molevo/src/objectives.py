@@ -1,17 +1,17 @@
-"""Funcoes objetivo: QED, SA score e a sua combinacao.
+"""Fonctions objectif : QED, SA score et leur combinaison.
 
-Duas notas com direcoes opostas:
+Deux notes aux directions opposees :
 
-  QED  0..1   maior e melhor   "tem perfil de farmaco oral?"
-  SA   1..10  MENOR e melhor   "da para fabricar?"
+  QED  0..1   plus haut est meilleur   "a-t-elle un profil de medicament oral ?"
+  SA   1..10  plus BAS est meilleur    "peut-on la fabriquer ?"
 
-Para combinar, o SA e invertido e normalizado para 0..1 com
-`normalizar_sa`. Toda a aritmetica de objetivos mora aqui; nenhum outro
-modulo deve inverter escalas por conta propria.
+Pour les combiner, le SA est inverse et normalise vers 0..1 par
+`normaliser_sa`. Toute l'arithmetique des objectifs vit ici ; aucun autre
+module ne doit inverser une echelle de son cote.
 
-O orcamento de avaliacoes tambem e contado aqui, porque este e o unico
-lugar por onde todas as avaliacoes passam. Isso torna impossivel comparar
-dois metodos com orcamentos diferentes por descuido.
+Le budget d'evaluations est compte ici aussi, parce que c'est le seul
+endroit par lequel toutes les evaluations passent. Comparer deux methodes
+avec des budgets differents devient ainsi impossible par inadvertance.
 """
 
 from __future__ import annotations
@@ -26,153 +26,155 @@ from rdkit.Chem import QED, RDConfig
 from . import representation as rep
 
 # --------------------------------------------------------------------------
-# SA score: mora em Contrib, nao no nucleo do RDKit
+# SA score : il vit dans Contrib, pas dans le noyau de RDKit
 # --------------------------------------------------------------------------
 
 _sascorer = None
 
 
-def _carregar_sascorer():
-    """Importa o sascorer, remendando o sys.path uma unica vez.
+def _charger_sascorer():
+    """Importe sascorer en rustinant sys.path une seule fois.
 
-    O SA score nao faz parte do RDKit instalado por pip; vem na pasta de
-    contribuicoes. Este remendo fica isolado aqui de proposito -- espalhado
-    pelo codigo, e a primeira coisa que quebra na maquina de outra pessoa.
+    Le SA score ne fait pas partie du RDKit installe par pip ; il arrive
+    dans le dossier des contributions. Cette rustine est isolee ici a
+    dessein -- disseminee dans le code, c'est la premiere chose qui casse
+    sur la machine de quelqu'un d'autre.
     """
     global _sascorer
     if _sascorer is None:
-        caminho = os.path.join(RDConfig.RDContribDir, "SA_Score")
-        if caminho not in sys.path:
-            sys.path.append(caminho)
-        import sascorer  # noqa: PLC0415 - import tardio e proposital
+        chemin = os.path.join(RDConfig.RDContribDir, "SA_Score")
+        if chemin not in sys.path:
+            sys.path.append(chemin)
+        import sascorer  # noqa: PLC0415 - import tardif volontaire
 
         _sascorer = sascorer
     return _sascorer
 
 
 # --------------------------------------------------------------------------
-# Orcamento
+# Budget
 # --------------------------------------------------------------------------
 
-class Orcamento:
-    """Conta avaliacoes de aptidao e para quando o limite acaba.
+class Budget:
+    """Compte les evaluations d'aptitude et s'arrete quand la limite tombe.
 
-    E a moeda do projeto: comparar o GA com as linhas de base so e honesto
-    com o mesmo numero de avaliacoes. Todos os metodos recebem um Orcamento
-    e param quando `esgotado` fica verdadeiro.
+    C'est la monnaie du projet : comparer le GA aux lignes de base n'est
+    honnete qu'a nombre d'evaluations egal. Les trois methodes recoivent un
+    Budget et s'arretent des que `epuise` devient vrai.
     """
 
     def __init__(self, total: int) -> None:
         self.total = total
-        self.usadas = 0
+        self.utilisees = 0
 
-    def gastar(self, n: int = 1) -> None:
-        self.usadas += n
+    def depenser(self, n: int = 1) -> None:
+        self.utilisees += n
 
     @property
     def restantes(self) -> int:
-        return max(0, self.total - self.usadas)
+        return max(0, self.total - self.utilisees)
 
     @property
-    def esgotado(self) -> bool:
-        return self.usadas >= self.total
+    def epuise(self) -> bool:
+        return self.utilisees >= self.total
 
     def __repr__(self) -> str:
-        return f"Orcamento({self.usadas}/{self.total})"
+        return f"Budget({self.utilisees}/{self.total})"
 
 
 # --------------------------------------------------------------------------
-# Notas
+# Notes
 # --------------------------------------------------------------------------
 
 @dataclass(frozen=True)
-class Notas:
-    """As notas de uma molecula. `valida` falso significa cadeia ilegivel."""
+class Notes:
+    """Les notes d'une molecule. `valide` faux signifie chaine illisible."""
 
     qed: float
     sa: float
     sa_norm: float
-    valida: bool = True
+    valide: bool = True
 
     @property
-    def objetivos(self) -> tuple[float, float]:
-        """Par para maximizar, usado pelo modulo pareto."""
+    def objectifs(self) -> tuple[float, float]:
+        """Couple a maximiser, utilise par le module pareto."""
         return (self.qed, self.sa_norm)
 
 
-NOTAS_INVALIDAS = Notas(qed=0.0, sa=10.0, sa_norm=0.0, valida=False)
+NOTES_INVALIDES = Notes(qed=0.0, sa=10.0, sa_norm=0.0, valide=False)
 
 
-def normalizar_sa(sa: float) -> float:
-    """SA 1..10 (minimizar) -> 0..1 (maximizar).
+def normaliser_sa(sa: float) -> float:
+    """SA 1..10 (a minimiser) -> 0..1 (a maximiser).
 
-    SA 1  (trivial)  -> 1.0
-    SA 10 (pesadelo) -> 0.0
+    SA 1  (trivial)   -> 1.0
+    SA 10 (cauchemar) -> 0.0
     """
     return max(0.0, min(1.0, (10.0 - sa) / 9.0))
 
 
 @lru_cache(maxsize=200_000)
-def _notas_por_smiles(smiles_canonico: str) -> Notas:
-    """Nucleo do calculo, com cache pelo SMILES canonico.
+def _notes_par_smiles(smiles_canonique: str) -> Notes:
+    """Coeur du calcul, avec cache sur le SMILES canonique.
 
-    O cache e pelo canonico e nao pela cadeia SELFIES porque varias cadeias
-    diferentes descrevem a mesma molecula -- o ganho e grande depois de
-    algumas geracoes, quando a populacao comeca a repetir.
+    Le cache porte sur le canonique et non sur la chaine SELFIES parce que
+    plusieurs chaines decrivent la meme molecule -- le gain est important
+    apres quelques generations, quand la population commence a repeter.
     """
     from rdkit import Chem
 
-    mol = Chem.MolFromSmiles(smiles_canonico)
-    # `MolFromSmiles("")` devolve uma molecula VAZIA, nao None. Sem o teste
-    # de numero de atomos, ela chega ao QED e ao sascorer, que devolvem
-    # None -- e `float(None)` levanta TypeError.
+    mol = Chem.MolFromSmiles(smiles_canonique)
+    # `MolFromSmiles("")` renvoie une molecule VIDE, pas None. Sans le test
+    # du nombre d'atomes, elle atteint le QED et le sascorer, qui renvoient
+    # None -- et `float(None)` leve TypeError.
     if mol is None or mol.GetNumAtoms() == 0:
-        return NOTAS_INVALIDAS
+        return NOTES_INVALIDES
 
     try:
-        sa_bruto = _carregar_sascorer().calculateScore(mol)
-        qed_bruto = QED.qed(mol)
-    except Exception:  # noqa: BLE001 - molecula exotica recusada pelos scores
-        return NOTAS_INVALIDAS
+        sa_brut = _charger_sascorer().calculateScore(mol)
+        qed_brut = QED.qed(mol)
+    except Exception:  # noqa: BLE001 - molecule exotique refusee par les scores
+        return NOTES_INVALIDES
 
-    # Os dois podem devolver None para moleculas degeneradas, sem levantar.
-    if sa_bruto is None or qed_bruto is None:
-        return NOTAS_INVALIDAS
+    # Les deux peuvent renvoyer None sur une molecule degeneree, sans lever.
+    if sa_brut is None or qed_brut is None:
+        return NOTES_INVALIDES
 
-    sa = float(sa_bruto)
-    return Notas(qed=float(qed_bruto), sa=sa, sa_norm=normalizar_sa(sa))
+    sa = float(sa_brut)
+    return Notes(qed=float(qed_brut), sa=sa, sa_norm=normaliser_sa(sa))
 
 
-def notas(cadeia: str, orcamento: Orcamento | None = None) -> Notas:
-    """Notas de uma cadeia SELFIES. Gasta uma unidade do orcamento."""
-    if orcamento is not None:
-        orcamento.gastar()
-    can = rep.canonico(cadeia)
+def notes(chaine: str, budget: Budget | None = None) -> Notes:
+    """Notes d'une chaine SELFIES. Depense une unite du budget."""
+    if budget is not None:
+        budget.depenser()
+    can = rep.canonique(chaine)
     if can is None:
-        return NOTAS_INVALIDAS
-    return _notas_por_smiles(can)
+        return NOTES_INVALIDES
+    return _notes_par_smiles(can)
 
 
 # --------------------------------------------------------------------------
-# Escalarizacao
+# Scalarisation
 # --------------------------------------------------------------------------
 
-def aptidao(cadeia: str, peso_qed: float = 0.5, orcamento: Orcamento | None = None) -> float:
-    """Soma ponderada dos dois objetivos: o MVP.
+def aptitude(chaine: str, poids_qed: float = 0.5, budget: Budget | None = None) -> float:
+    """Somme ponderee des deux objectifs : le MVP.
 
-    peso_qed = 1.0  -> so QED (o plano B do catalogo)
-    peso_qed = 0.0  -> so facilidade de sintese
-    peso_qed = 0.5  -> compromisso neutro
+    poids_qed = 1.0  -> QED seul (le plan B du catalogue)
+    poids_qed = 0.0  -> facilite de synthese seule
+    poids_qed = 0.5  -> compromis neutre
 
-    O valor do peso e arbitrario, e esse e justamente o defeito da soma
-    ponderada. Varra-o de 0 a 1 no relatorio e compare com a frente de
-    Pareto do modulo pareto.
+    La valeur du poids est arbitraire, et c'est precisement le defaut de la
+    somme ponderee. La balayer de 0 a 1 dans le rapport et comparer au
+    front de Pareto du module pareto.
     """
-    n = notas(cadeia, orcamento)
-    return peso_qed * n.qed + (1.0 - peso_qed) * n.sa_norm
+    n = notes(chaine, budget)
+    return poids_qed * n.qed + (1.0 - poids_qed) * n.sa_norm
 
 
-def limpar_cache() -> None:
-    """Zera os caches. Util entre execucoes com sementes diferentes."""
-    _notas_por_smiles.cache_clear()
-    rep.para_mol.cache_clear()
+def vider_cache() -> None:
+    """Vide les caches. Utile entre deux executions de graines differentes."""
+    _notes_par_smiles.cache_clear()
+    rep.vers_mol.cache_clear()
+    rep.decodage_ok.cache_clear()

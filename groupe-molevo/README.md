@@ -30,7 +30,7 @@ l'algorithme génétique : c'est ce qui rend la vérification indépendante.
 ```
 representation.py ──┐
                     ├──► ga.py ────────┐
-objectives.py ──────┤                  ├──► registro.jsonl ──► diversity.py
+objectives.py ──────┤                  ├──► registre.jsonl ──► diversity.py
                     └──► baselines.py ─┘                       pareto.py
 operators.py ───────┘                                          verifier.py
                                                                notebooks/
@@ -51,7 +51,6 @@ notebook n'importe rien de la recherche.
 | `src/pareto.py` | dominance, fronts, couches, hypervolume (Python pur) |
 | `src/verifier.py` | vérificateur indépendant des solutions |
 | `src/run.py` | ligne de commande : exécute tout et écrit le registre |
-| `medir.py` | produit toutes les mesures du rapport en une fois |
 
 ### Deux décisions à expliquer à la soutenance
 
@@ -66,7 +65,7 @@ Vérifié par `tests/test_representation.py::test_robustez_do_alfabeto`.
 
 **Pourquoi le budget d'évaluations est un objet.** Comparer l'algorithme
 génétique aux lignes de base n'est honnête qu'avec le même nombre d'appels à
-la fonction d'aptitude. La classe `Orcamento` est partagée par les trois
+la fonction d'aptitude. La classe `Budget` est partagée par les trois
 méthodes : la comparaison est juste par construction et non par discipline.
 L'axe horizontal des graphiques est en **évaluations**, jamais en
 **générations**.
@@ -91,23 +90,23 @@ pip install -r requirements.txt
 
 ```bash
 # exécution rapide, pour vérifier que tout fonctionne
-python -m src.run --sementes 1 --pop 30 --geracoes 10
+python -m src.run --graines 1 --pop 30 --generations 10
 
 # exécution du rapport : 10 graines, 10 000 évaluations par méthode
-python -m src.run --sementes 10 --pop 100 --geracoes 100
+python -m src.run --graines 10 --pop 100 --generations 100
 
 # plan B du catalogue : un seul objectif
-python -m src.run --sementes 10 --peso-qed 1.0
+python -m src.run --graines 10 --poids-qed 1.0
 ```
 
-Sortie dans `resultados/` : `registro.jsonl` (une molécule distincte par ligne,
-avec ses notes, la méthode, la graine et la génération) et `resumo.json`
+Sortie dans `resultats/` : `registre.jsonl` (une molécule distincte par ligne,
+avec ses notes, la méthode, la graine et la génération) et `resume.json`
 (courbes agrégées, front de Pareto, hypervolume, diversité).
 
 ### Vérificateur indépendant
 
 ```bash
-python -m src.verifier resultados/registro.jsonl
+python -m src.verifier resultats/registre.jsonl
 ```
 
 Relit le registre et revérifie tout par un chemin de code propre, sans
@@ -277,7 +276,7 @@ ce genre d'écart.
 ### Protocole
 
 Budget compté en évaluations de la fonction d'aptitude et partagé par les
-trois méthodes via la classe `Orcamento`. Graines 0 à 4, fixées et
+trois méthodes via la classe `Budget`. Graines 0 à 4, fixées et
 consignées. Moyenne et écart-type sur les cinq graines. Comparaison
 systématique à deux lignes de base. Les figures et `mesures.json` sont
 régénérés ensemble, donc ils ne peuvent pas diverger.
@@ -309,7 +308,7 @@ régénérés ensemble, donc ils ne peuvent pas diverger.
 - **Effondrement de la diversité.** La population converge vers des clones.
   Atténué par l'archive des trouvailles, qui conserve tout ce qui a été
   rencontré en chemin.
-- **Plan B :** objectif unique (QED), avec `--peso-qed 1.0`.
+- **Plan B :** objectif unique (QED), avec `--poids-qed 1.0`.
 
 ## Répartition du travail
 

@@ -1,8 +1,8 @@
-"""Testes da representacao SELFIES.
+"""Tests de la representation SELFIES.
 
-O teste `test_robustez_do_alfabeto` e o mais importante do projeto: ele
-verifica a propriedade em que todo o resto se apoia. Se ele falhar, o
-algoritmo genetico inteiro perde a justificativa.
+Le test `test_robustesse_alphabet` est le plus important du projet : il
+verifie la propriete sur laquelle tout le reste repose. S'il echoue,
+l'algorithme genetique perd sa justification.
 """
 
 import random
@@ -12,132 +12,131 @@ from rdkit import Chem
 
 from src import representation as rep
 
-# Alguns farmacos conhecidos, para a ida e volta.
-CONHECIDOS = [
-    "CC(=O)Oc1ccccc1C(=O)O",            # aspirina
-    "CC(C)Cc1ccc(cc1)C(C)C(=O)O",       # ibuprofeno
+# Quelques medicaments connus, pour l'aller-retour.
+CONNUS = [
+    "CC(=O)Oc1ccccc1C(=O)O",            # aspirine
+    "CC(C)Cc1ccc(cc1)C(C)C(=O)O",       # ibuprofene
     "CC(=O)Nc1ccc(O)cc1",               # paracetamol
-    "Cn1cnc2c1c(=O)n(C)c(=O)n2C",       # cafeina
-    "CCO",                              # etanol
-    "c1ccccc1",                         # benzeno
+    "Cn1cnc2c1c(=O)n(C)c(=O)n2C",       # cafeine
+    "CCO",                              # ethanol
+    "c1ccccc1",                         # benzene
 ]
 
 
-def canonizar(smiles: str) -> str:
+def canoniser(smiles: str) -> str:
     return Chem.MolToSmiles(Chem.MolFromSmiles(smiles))
 
 
 # --------------------------------------------------------------------------
-# Ida e volta
+# Aller-retour
 # --------------------------------------------------------------------------
 
-@pytest.mark.parametrize("smiles", CONHECIDOS)
-def test_ida_e_volta_preserva_a_molecula(smiles):
-    cadeia = rep.de_smiles(smiles)
-    volta = rep.para_smiles(cadeia)
-    assert canonizar(volta) == canonizar(smiles)
+@pytest.mark.parametrize("smiles", CONNUS)
+def test_aller_retour_preserve_la_molecule(smiles):
+    chaine = rep.depuis_smiles(smiles)
+    retour = rep.vers_smiles(chaine)
+    assert canoniser(retour) == canoniser(smiles)
 
 
-def test_canonico_concorda_com_o_rdkit():
-    cadeia = rep.de_smiles("CC(=O)Oc1ccccc1C(=O)O")
-    assert rep.canonico(cadeia) == canonizar("CC(=O)Oc1ccccc1C(=O)O")
+def test_canonique_concorde_avec_rdkit():
+    chaine = rep.depuis_smiles("CC(=O)Oc1ccccc1C(=O)O")
+    assert rep.canonique(chaine) == canoniser("CC(=O)Oc1ccccc1C(=O)O")
 
 
-def test_cadeias_diferentes_podem_dar_a_mesma_molecula():
-    # Por isso o cache e o arquivo de achados indexam pelo SMILES canonico
-    # e nao pela cadeia SELFIES.
-    a = rep.de_smiles("CCO")
-    b = rep.de_smiles("OCC")
-    assert rep.canonico(a) == rep.canonico(b)
+def test_deux_chaines_peuvent_donner_la_meme_molecule():
+    # C'est pourquoi le cache et l'archive indexent par SMILES canonique et
+    # non par la chaine SELFIES.
+    a = rep.depuis_smiles("CCO")
+    b = rep.depuis_smiles("OCC")
+    assert rep.canonique(a) == rep.canonique(b)
 
 
 # --------------------------------------------------------------------------
-# A propriedade central
+# La propriete centrale
 # --------------------------------------------------------------------------
 
-def test_robustez_do_alfabeto():
-    """A promessa do SELFIES: toda sequencia de fichas DECODIFICA.
+def test_robustesse_alphabet():
+    """La promesse de SELFIES : toute sequence de jetons SE DECODE.
 
-    E esta a propriedade exata que a biblioteca garante, e e so ela que o
-    algoritmo genetico precisa: nenhuma mutacao produz uma cadeia que o
-    decodificador recuse.
+    C'est exactement la propriete que la bibliotheque garantit, et c'est la
+    seule dont l'algorithme genetique a besoin : aucune mutation ne produit
+    une chaine que le decodeur refuse.
     """
     rng = random.Random(0)
-    falhas = []
+    echecs = []
     for _ in range(2000):
-        cadeia = rep.aleatoria(rng, n_min=1, n_max=30)
-        if not rep.decodifica_ok(cadeia):
-            falhas.append(cadeia)
-    assert not falhas, f"{len(falhas)} cadeias nao decodificam, ex.: {falhas[:3]}"
+        chaine = rep.aleatoire(rng, n_min=1, n_max=30)
+        if not rep.decodage_ok(chaine):
+            echecs.append(chaine)
+    assert not echecs, f"{len(echecs)} chaines ne se decodent pas, ex. : {echecs[:3]}"
 
 
-def test_cadeias_longas_dao_moleculas_com_atomos():
-    """Decodificar sempre funciona, mas pode dar molecula VAZIA.
+def test_chaines_longues_donnent_des_molecules_avec_atomes():
+    """Le decodage reussit toujours, mais peut donner une molecule VIDE.
 
-    Uma cadeia de uma ficha so pode ser degenerada (`[Ring1]` nao tem
-    atomo). Com algumas fichas isso praticamente nao acontece -- e e por
-    isso que a populacao inicial nunca usa n_min=1.
+    Une chaine d'un seul jeton peut etre degeneree (`[Ring1]` n'a pas
+    d'atome). Avec quelques jetons cela n'arrive quasiment plus -- et c'est
+    pourquoi la population initiale n'utilise jamais n_min=1.
     """
     rng = random.Random(0)
-    sem_atomo = [c for _ in range(500)
-                 if not rep.valida(c := rep.aleatoria(rng, n_min=6, n_max=30))]
-    assert len(sem_atomo) < 25, (
-        f"{len(sem_atomo)}/500 cadeias sem atomo, ex.: {sem_atomo[:3]}")
+    sans_atome = [c for _ in range(500)
+                  if not rep.valide(c := rep.aleatoire(rng, n_min=6, n_max=30))]
+    assert len(sans_atome) < 25, (
+        f"{len(sans_atome)}/500 chaines sans atome, ex. : {sans_atome[:3]}")
 
 
-def test_molecula_vazia_e_rejeitada():
-    """A armadilha que causou um TypeError em producao.
+def test_molecule_vide_est_rejetee():
+    """Le piege qui a provoque un TypeError en execution reelle.
 
-    `Chem.MolFromSmiles("")` devolve uma molecula VAZIA, nao None. Se ela
-    passar, o QED e o SA score recebem zero atomos e devolvem None, e
-    `float(None)` levanta TypeError. `para_mol` tem de devolver None.
+    `Chem.MolFromSmiles("")` renvoie une molecule VIDE, pas None. Si elle
+    passe, le QED et le SA score recoivent zero atome et renvoient None, et
+    `float(None)` leve TypeError. `vers_mol` doit renvoyer None.
     """
-    from rdkit import Chem
+    vide = Chem.MolFromSmiles("")
+    assert vide is not None, "RDKit a change : MolFromSmiles('') renvoie None"
+    assert vide.GetNumAtoms() == 0
 
-    vazia = Chem.MolFromSmiles("")
-    assert vazia is not None, "o RDKit mudou: MolFromSmiles('') agora da None"
-    assert vazia.GetNumAtoms() == 0
-
-    # `[Ring1]` sozinha: uma ficha de fechamento de anel sem nenhum atomo.
-    assert rep.decodifica_ok("[Ring1]")      # decodifica, como prometido
-    assert not rep.valida("[Ring1]")         # mas nao tem atomo
-    assert rep.para_mol("[Ring1]") is None
-    assert rep.canonico("[Ring1]") is None   # nunca a cadeia vazia
+    # `[Ring1]` seul : un jeton de fermeture de cycle, sans aucun atome.
+    assert rep.decodage_ok("[Ring1]")      # se decode, comme promis
+    assert not rep.valide("[Ring1]")       # mais n'a pas d'atome
+    assert rep.vers_mol("[Ring1]") is None
+    assert rep.canonique("[Ring1]") is None   # jamais la chaine vide
 
 
-def test_alfabeto_nao_e_vazio_e_e_estavel():
-    a, b = rep.alfabeto(), rep.alfabeto()
+def test_alphabet_non_vide_et_stable():
+    a, b = rep.alphabet(), rep.alphabet()
     assert len(a) > 10
-    assert a == b          # a ordem fixa e o que garante reprodutibilidade
+    assert a == b          # l'ordre fixe garantit la reproductibilite
 
 
-def test_fichas_recompoem_a_cadeia():
+def test_jetons_recomposent_la_chaine():
     rng = random.Random(1)
-    cadeia = rep.aleatoria(rng)
-    assert "".join(rep.fichas(cadeia)) == cadeia
+    chaine = rep.aleatoire(rng)
+    assert "".join(rep.jetons(chaine)) == chaine
 
 
 # --------------------------------------------------------------------------
-# Geracao
+# Generation
 # --------------------------------------------------------------------------
 
-def test_aleatoria_respeita_a_semente():
-    assert rep.aleatoria(random.Random(42)) == rep.aleatoria(random.Random(42))
+def test_aleatoire_respecte_la_graine():
+    assert rep.aleatoire(random.Random(42)) == rep.aleatoire(random.Random(42))
 
 
-def test_populacao_inicial_tem_o_tamanho_pedido():
-    pop = rep.populacao_inicial(random.Random(0), 25)
+def test_population_initiale_a_la_taille_demandee():
+    pop = rep.population_initiale(random.Random(0), 25)
     assert len(pop) == 25
-    assert all(rep.valida(s) for s in pop)
+    assert all(rep.valide(s) for s in pop)
 
 
-def test_populacao_inicial_usa_as_sementes():
-    pop = rep.populacao_inicial(random.Random(0), 10, sementes=CONHECIDOS[:3])
-    canonicos = {rep.canonico(s) for s in pop}
-    assert canonizar(CONHECIDOS[0]) in canonicos
+def test_population_initiale_utilise_les_graines():
+    pop = rep.population_initiale(random.Random(0), 10, graines=CONNUS[:3])
+    canoniques = {rep.canonique(s) for s in pop}
+    assert canoniser(CONNUS[0]) in canoniques
     assert len(pop) == 10
 
 
-def test_populacao_inicial_ignora_semente_invalida():
-    pop = rep.populacao_inicial(random.Random(0), 5, sementes=["isto nao e um smiles"])
+def test_population_initiale_ignore_une_graine_invalide():
+    pop = rep.population_initiale(
+        random.Random(0), 5, graines=["ceci n'est pas un smiles"])
     assert len(pop) == 5

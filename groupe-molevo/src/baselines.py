@@ -1,13 +1,13 @@
-"""Linhas de base: busca aleatoria e hill climbing.
+"""Lignes de base : recherche aleatoire et hill climbing.
 
-Sem elas, uma curva de aptidao subindo nao prova nada -- qualquer metodo
-que guarde o melhor resultado produz uma curva subindo.
+Sans elles, une courbe d'aptitude qui monte ne prouve rien -- n'importe
+quelle methode qui garde son meilleur resultat produit une courbe qui monte.
 
-As duas devolvem o mesmo `Resultado` do modulo ga e gastam o mesmo
-`Orcamento`, de modo que os tres metodos sao comparaveis sem ajuste.
-O eixo horizontal dos graficos deve ser `historico_avaliacoes`, nunca o
-numero de iteracoes: iteracoes de metodos diferentes custam coisas
-diferentes.
+Les deux renvoient le meme `Resultat` que le module ga et depensent le meme
+`Budget`, de sorte que les trois methodes sont comparables sans ajustement.
+L'axe horizontal des graphiques doit etre `historique_evaluations`, jamais
+le nombre d'iterations : une iteration de methodes differentes ne coute pas
+la meme chose.
 """
 
 from __future__ import annotations
@@ -16,148 +16,150 @@ import random
 
 from . import objectives as obj
 from . import representation as rep
-from .ga import Achado, Arquivo, Resultado
+from .ga import Archive, Resultat, Trouvaille
 
 
-def _registrar(
-    arquivo: Arquivo,
-    cadeia: str,
-    n: obj.Notas,
+def _enregistrer(
+    archive: Archive,
+    chaine: str,
+    n: obj.Notes,
     apt: float,
-    passo: int,
-    metodo: str,
-    semente: int,
+    pas: int,
+    methode: str,
+    graine: int,
 ) -> None:
-    if not n.valida:
+    if not n.valide:
         return
-    smi = rep.canonico(cadeia)
+    smi = rep.canonique(chaine)
     if smi is None:
         return
-    arquivo.registrar(
-        Achado(
-            smiles=smi, selfies=cadeia, qed=n.qed, sa=n.sa, sa_norm=n.sa_norm,
-            aptidao=apt, geracao=passo, metodo=metodo, semente=semente,
+    archive.enregistrer(
+        Trouvaille(
+            smiles=smi, selfies=chaine, qed=n.qed, sa=n.sa, sa_norm=n.sa_norm,
+            aptitude=apt, generation=pas, methode=methode, graine=graine,
         )
     )
 
 
-def busca_aleatoria(
-    semente: int,
-    orcamento: obj.Orcamento,
-    peso_qed: float = 0.5,
-    passo_registro: int = 100,
-) -> Resultado:
-    """O piso. Sorteia cadeias ao acaso e guarda a melhor.
+def recherche_aleatoire(
+    graine: int,
+    budget: obj.Budget,
+    poids_qed: float = 0.5,
+    pas_enregistrement: int = 100,
+) -> Resultat:
+    """Le plancher. Tire des chaines au hasard et garde la meilleure.
 
-    Se o algoritmo genetico empatar com isto, ele nao esta evoluindo nada.
-    A causa habitual e um bug: aptidao calculada mas nao usada na selecao,
-    ou taxa de mutacao tao alta que destroi qualquer heranca.
+    Si l'algorithme genetique fait match nul avec ceci, il n'evolue rien.
+    La cause habituelle est un bug : aptitude calculee mais non utilisee
+    dans la selection, ou taux de mutation si eleve qu'il detruit tout
+    heritage.
     """
-    rng = random.Random(semente)
-    arquivo = Arquivo()
-    hist_melhor: list[float] = []
-    hist_media: list[float] = []
-    hist_aval: list[int] = []
-    melhor = 0.0
-    soma, conta = 0.0, 0
-    passo = 0
+    rng = random.Random(graine)
+    archive = Archive()
+    hist_meilleur: list[float] = []
+    hist_moyenne: list[float] = []
+    hist_eval: list[int] = []
+    meilleur = 0.0
+    somme, compte = 0.0, 0
+    pas = 0
 
-    while not orcamento.esgotado:
-        cadeia = rep.aleatoria(rng)
-        n = obj.notas(cadeia, orcamento)
-        apt = peso_qed * n.qed + (1 - peso_qed) * n.sa_norm
-        _registrar(arquivo, cadeia, n, apt, passo, "aleatoria", semente)
-        melhor = max(melhor, apt)
-        soma += apt
-        conta += 1
-        passo += 1
-        if passo % passo_registro == 0:
-            hist_melhor.append(melhor)
-            hist_media.append(soma / conta)
-            hist_aval.append(orcamento.usadas)
+    while not budget.epuise:
+        chaine = rep.aleatoire(rng)
+        n = obj.notes(chaine, budget)
+        apt = poids_qed * n.qed + (1 - poids_qed) * n.sa_norm
+        _enregistrer(archive, chaine, n, apt, pas, "aleatoire", graine)
+        meilleur = max(meilleur, apt)
+        somme += apt
+        compte += 1
+        pas += 1
+        if pas % pas_enregistrement == 0:
+            hist_meilleur.append(meilleur)
+            hist_moyenne.append(somme / compte)
+            hist_eval.append(budget.utilisees)
 
-    if not hist_melhor or hist_aval[-1] != orcamento.usadas:
-        hist_melhor.append(melhor)
-        hist_media.append(soma / max(1, conta))
-        hist_aval.append(orcamento.usadas)
+    if not hist_meilleur or hist_eval[-1] != budget.utilisees:
+        hist_meilleur.append(meilleur)
+        hist_moyenne.append(somme / max(1, compte))
+        hist_eval.append(budget.utilisees)
 
-    return Resultado(
-        metodo="aleatoria", semente=semente, arquivo=arquivo,
-        historico_melhor=hist_melhor, historico_media=hist_media,
-        historico_avaliacoes=hist_aval, populacao_final=[],
+    return Resultat(
+        methode="aleatoire", graine=graine, archive=archive,
+        historique_meilleur=hist_meilleur, historique_moyenne=hist_moyenne,
+        historique_evaluations=hist_eval, population_finale=[],
     )
 
 
 def hill_climbing(
-    semente: int,
-    orcamento: obj.Orcamento,
-    peso_qed: float = 0.5,
-    p_mutacao: float = 0.15,
-    reinicios: bool = False,
-    paciencia: int = 500,
-    passo_registro: int = 100,
-) -> Resultado:
-    """Busca local gananciosa: muta e so aceita melhorias.
+    graine: int,
+    budget: obj.Budget,
+    poids_qed: float = 0.5,
+    p_mutation: float = 0.15,
+    redemarrages: bool = False,
+    patience: int = 500,
+    pas_enregistrement: int = 100,
+) -> Resultat:
+    """Recherche locale gloutonne : mute et n'accepte que les ameliorations.
 
-    Sobe rapido no comeco e depois empaca. Ao chegar num pico local, toda
-    mutacao piora e ele fica preso ali -- e esse o contraste com a
-    populacao do GA, que cobre varios picos ao mesmo tempo.
+    Monte vite au debut puis se bloque. Arrive sur un optimum local, toute
+    mutation degrade et il y reste -- c'est le contraste avec la population
+    du GA, qui couvre plusieurs sommets a la fois.
 
-    `reinicios=True` reinicia de uma cadeia nova depois de `paciencia`
-    tentativas sem melhora. E uma linha de base mais forte e mais honesta;
-    rode as duas e mostre a diferenca.
+    `redemarrages=True` repart d'une chaine neuve apres `patience` essais
+    sans amelioration. C'est une ligne de base plus forte et plus honnete ;
+    executer les deux et montrer la difference.
     """
     from . import operators as ops
 
-    rng = random.Random(semente)
-    arquivo = Arquivo()
-    hist_melhor: list[float] = []
-    hist_media: list[float] = []
-    hist_aval: list[int] = []
+    rng = random.Random(graine)
+    archive = Archive()
+    hist_meilleur: list[float] = []
+    hist_moyenne: list[float] = []
+    hist_eval: list[int] = []
 
-    atual = rep.aleatoria(rng)
-    n_atual = obj.notas(atual, orcamento)
-    apt_atual = peso_qed * n_atual.qed + (1 - peso_qed) * n_atual.sa_norm
-    _registrar(arquivo, atual, n_atual, apt_atual, 0, "hill", semente)
+    courant = rep.aleatoire(rng)
+    n_courant = obj.notes(courant, budget)
+    apt_courant = poids_qed * n_courant.qed + (1 - poids_qed) * n_courant.sa_norm
+    _enregistrer(archive, courant, n_courant, apt_courant, 0, "hill", graine)
 
-    melhor = apt_atual
-    soma, conta = apt_atual, 1
-    passo, sem_melhora = 0, 0
+    meilleur = apt_courant
+    somme, compte = apt_courant, 1
+    pas, sans_amelioration = 0, 0
 
-    while not orcamento.esgotado:
-        candidato = ops.mutar(atual, rng, p_mutacao)
-        n = obj.notas(candidato, orcamento)
-        apt = peso_qed * n.qed + (1 - peso_qed) * n.sa_norm
-        _registrar(arquivo, candidato, n, apt, passo, "hill", semente)
+    while not budget.epuise:
+        candidat = ops.muter(courant, rng, p_mutation)
+        n = obj.notes(candidat, budget)
+        apt = poids_qed * n.qed + (1 - poids_qed) * n.sa_norm
+        _enregistrer(archive, candidat, n, apt, pas, "hill", graine)
 
-        if apt > apt_atual:
-            atual, apt_atual = candidato, apt
-            sem_melhora = 0
+        if apt > apt_courant:
+            courant, apt_courant = candidat, apt
+            sans_amelioration = 0
         else:
-            sem_melhora += 1
-            if reinicios and sem_melhora >= paciencia:
-                atual = rep.aleatoria(rng)
-                n_atual = obj.notas(atual, orcamento)
-                apt_atual = peso_qed * n_atual.qed + (1 - peso_qed) * n_atual.sa_norm
-                sem_melhora = 0
+            sans_amelioration += 1
+            if redemarrages and sans_amelioration >= patience:
+                courant = rep.aleatoire(rng)
+                n_courant = obj.notes(courant, budget)
+                apt_courant = (poids_qed * n_courant.qed
+                               + (1 - poids_qed) * n_courant.sa_norm)
+                sans_amelioration = 0
 
-        melhor = max(melhor, apt)
-        soma += apt
-        conta += 1
-        passo += 1
-        if passo % passo_registro == 0:
-            hist_melhor.append(melhor)
-            hist_media.append(soma / conta)
-            hist_aval.append(orcamento.usadas)
+        meilleur = max(meilleur, apt)
+        somme += apt
+        compte += 1
+        pas += 1
+        if pas % pas_enregistrement == 0:
+            hist_meilleur.append(meilleur)
+            hist_moyenne.append(somme / compte)
+            hist_eval.append(budget.utilisees)
 
-    if not hist_melhor or hist_aval[-1] != orcamento.usadas:
-        hist_melhor.append(melhor)
-        hist_media.append(soma / max(1, conta))
-        hist_aval.append(orcamento.usadas)
+    if not hist_meilleur or hist_eval[-1] != budget.utilisees:
+        hist_meilleur.append(meilleur)
+        hist_moyenne.append(somme / max(1, compte))
+        hist_eval.append(budget.utilisees)
 
-    return Resultado(
-        metodo="hill" + ("_reinicios" if reinicios else ""),
-        semente=semente, arquivo=arquivo,
-        historico_melhor=hist_melhor, historico_media=hist_media,
-        historico_avaliacoes=hist_aval, populacao_final=[atual],
+    return Resultat(
+        methode="hill" + ("_redemarrages" if redemarrages else ""),
+        graine=graine, archive=archive,
+        historique_meilleur=hist_meilleur, historique_moyenne=hist_moyenne,
+        historique_evaluations=hist_eval, population_finale=[courant],
     )

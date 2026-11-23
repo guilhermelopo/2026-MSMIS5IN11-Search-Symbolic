@@ -1,8 +1,8 @@
-"""Testes do algoritmo genetico, das linhas de base e do verificador.
+"""Tests de l'algorithme genetique, des lignes de base et du verificateur.
 
-Rodadas pequenas de proposito: estes testes existem para provar
-propriedades (o elitismo funciona, o orcamento e respeitado, a semente
-reproduz), nao para medir qualidade. As medidas vao no notebook.
+Executions volontairement petites : ces tests existent pour prouver des
+proprietes (l'elitisme fonctionne, le budget est respecte, la graine
+reproduit), pas pour mesurer une qualite. Les mesures vont dans le notebook.
 """
 
 import json
@@ -14,177 +14,183 @@ from src import objectives as obj
 from src import verifier
 
 
-PEQUENO = dict(tamanho_pop=12, geracoes=6, peso_qed=0.5)
+PETIT = dict(taille_pop=12, generations=6, poids_qed=0.5)
 
 
 # --------------------------------------------------------------------------
-# Elitismo e historico
+# Elitisme et historique
 # --------------------------------------------------------------------------
 
-def test_melhor_nunca_piora():
-    """A consequencia observavel do elitismo.
+def test_le_meilleur_ne_regresse_jamais():
+    """La consequence observable de l'elitisme.
 
-    Sem elitismo, uma mutacao azarada destroi o melhor individuo e a curva
-    CAI. Este teste e a forma barata de provar que ele esta ligado.
+    Sans elitisme, une mutation malchanceuse detruit le meilleur individu et
+    la courbe DESCEND. Ce test est la facon economique de prouver qu'il est
+    bien actif.
     """
-    r = ga.evoluir(semente=0, **PEQUENO)
-    historico = r.historico_melhor
-    assert historico == sorted(historico), historico
+    r = ga.evoluer(graine=0, **PETIT)
+    historique = r.historique_meilleur
+    assert historique == sorted(historique), historique
 
 
-def test_historico_tem_uma_entrada_por_geracao():
-    r = ga.evoluir(semente=0, **PEQUENO)
-    assert len(r.historico_melhor) == PEQUENO["geracoes"]
-    assert len(r.historico_media) == PEQUENO["geracoes"]
-    assert len(r.historico_avaliacoes) == PEQUENO["geracoes"]
+def test_historique_a_une_entree_par_generation():
+    r = ga.evoluer(graine=0, **PETIT)
+    assert len(r.historique_meilleur) == PETIT["generations"]
+    assert len(r.historique_moyenne) == PETIT["generations"]
+    assert len(r.historique_evaluations) == PETIT["generations"]
 
 
-def test_avaliacoes_crescem_de_forma_monotonica():
-    r = ga.evoluir(semente=0, **PEQUENO)
-    assert r.historico_avaliacoes == sorted(r.historico_avaliacoes)
+def test_les_evaluations_croissent_de_facon_monotone():
+    r = ga.evoluer(graine=0, **PETIT)
+    assert r.historique_evaluations == sorted(r.historique_evaluations)
 
 
-def test_populacao_final_tem_o_tamanho_certo():
-    r = ga.evoluir(semente=0, **PEQUENO)
-    assert len(r.populacao_final) == PEQUENO["tamanho_pop"]
-
-
-# --------------------------------------------------------------------------
-# Reprodutibilidade
-# --------------------------------------------------------------------------
-
-def test_mesma_semente_mesmo_resultado():
-    obj.limpar_cache()
-    a = ga.evoluir(semente=42, **PEQUENO)
-    obj.limpar_cache()
-    b = ga.evoluir(semente=42, **PEQUENO)
-    assert a.historico_melhor == b.historico_melhor
-    assert a.populacao_final == b.populacao_final
-
-
-def test_sementes_diferentes_resultados_diferentes():
-    a = ga.evoluir(semente=1, **PEQUENO)
-    b = ga.evoluir(semente=2, **PEQUENO)
-    assert a.populacao_final != b.populacao_final
+def test_population_finale_a_la_bonne_taille():
+    r = ga.evoluer(graine=0, **PETIT)
+    assert len(r.population_finale) == PETIT["taille_pop"]
 
 
 # --------------------------------------------------------------------------
-# Orcamento
+# Reproductibilite
 # --------------------------------------------------------------------------
 
-def test_ga_respeita_o_orcamento():
-    o = obj.Orcamento(50)
-    ga.evoluir(semente=0, tamanho_pop=20, geracoes=100, orcamento=o)
-    # Para na primeira geracao apos esgotar, logo nao passa de um lote.
-    assert o.usadas <= 50 + 20
+def test_meme_graine_meme_resultat():
+    obj.vider_cache()
+    a = ga.evoluer(graine=42, **PETIT)
+    obj.vider_cache()
+    b = ga.evoluer(graine=42, **PETIT)
+    assert a.historique_meilleur == b.historique_meilleur
+    assert a.population_finale == b.population_finale
 
 
-def test_os_tres_metodos_gastam_o_mesmo_orcamento():
-    """A comparacao do relatorio so e honesta se isto valer."""
+def test_graines_differentes_resultats_differents():
+    a = ga.evoluer(graine=1, **PETIT)
+    b = ga.evoluer(graine=2, **PETIT)
+    assert a.population_finale != b.population_finale
+
+
+# --------------------------------------------------------------------------
+# Budget
+# --------------------------------------------------------------------------
+
+def test_le_ga_respecte_le_budget():
+    b = obj.Budget(50)
+    ga.evoluer(graine=0, taille_pop=20, generations=100, budget=b)
+    # Il s'arrete a la premiere generation apres epuisement, donc il ne
+    # depasse pas d'un lot.
+    assert b.utilisees <= 50 + 20
+
+
+def test_les_trois_methodes_depensent_le_meme_budget():
+    """La comparaison du rapport n'est honnete que si ceci tient."""
     total = 200
-    o_al = obj.Orcamento(total)
-    o_hc = obj.Orcamento(total)
-    baselines.busca_aleatoria(0, o_al)
-    baselines.hill_climbing(0, o_hc)
-    assert o_al.usadas == total
-    assert o_hc.usadas == total
+    b_al = obj.Budget(total)
+    b_hc = obj.Budget(total)
+    baselines.recherche_aleatoire(0, b_al)
+    baselines.hill_climbing(0, b_hc)
+    assert b_al.utilisees == total
+    assert b_hc.utilisees == total
 
 
 # --------------------------------------------------------------------------
-# Arquivo de achados
+# Archive des trouvailles
 # --------------------------------------------------------------------------
 
-def test_arquivo_nao_guarda_duplicatas():
-    r = ga.evoluir(semente=0, **PEQUENO)
-    smiles = [a.smiles for a in r.arquivo.itens.values()]
+def test_l_archive_ne_garde_pas_de_doublon():
+    r = ga.evoluer(graine=0, **PETIT)
+    smiles = [t.smiles for t in r.archive.items.values()]
     assert len(smiles) == len(set(smiles))
 
 
-def test_arquivo_guarda_mais_do_que_a_populacao_final():
-    """O ponto do arquivo: preservar o que foi achado no caminho."""
-    r = ga.evoluir(semente=0, tamanho_pop=20, geracoes=15, peso_qed=0.5)
-    assert len(r.arquivo) > 20
+def test_l_archive_garde_plus_que_la_population_finale():
+    """Tout l'interet de l'archive : preserver ce qui a ete trouve en chemin."""
+    r = ga.evoluer(graine=0, taille_pop=20, generations=15, poids_qed=0.5)
+    assert len(r.archive) > 20
 
 
-def test_melhores_vem_ordenados():
-    r = ga.evoluir(semente=0, **PEQUENO)
-    aptidoes = [a.aptidao for a in r.arquivo.melhores(5)]
-    assert aptidoes == sorted(aptidoes, reverse=True)
-
-
-# --------------------------------------------------------------------------
-# Linhas de base
-# --------------------------------------------------------------------------
-
-@pytest.mark.parametrize("metodo", ["aleatoria", "hill"])
-def test_linhas_de_base_produzem_resultado_utilizavel(metodo):
-    o = obj.Orcamento(300)
-    r = (baselines.busca_aleatoria if metodo == "aleatoria" else baselines.hill_climbing)(0, o)
-    assert r.historico_melhor
-    assert r.historico_melhor == sorted(r.historico_melhor)
-    assert len(r.arquivo) > 0
-    assert r.historico_avaliacoes[-1] == 300
-
-
-def test_hill_climbing_com_reinicios_tambem_funciona():
-    o = obj.Orcamento(300)
-    r = baselines.hill_climbing(0, o, reinicios=True, paciencia=20)
-    assert r.melhor_aptidao > 0
-    assert "reinicios" in r.metodo
+def test_les_meilleures_sortent_triees():
+    r = ga.evoluer(graine=0, **PETIT)
+    aptitudes = [t.aptitude for t in r.archive.meilleures(5)]
+    assert aptitudes == sorted(aptitudes, reverse=True)
 
 
 # --------------------------------------------------------------------------
-# Verificador
+# Lignes de base
 # --------------------------------------------------------------------------
 
-def test_verificador_aprova_um_registro_honesto():
-    r = ga.evoluir(semente=0, **PEQUENO)
-    registro = [a.como_dict() for a in r.arquivo.itens.values()]
-    assert verifier.verificar(registro) == []
+@pytest.mark.parametrize("methode", ["aleatoire", "hill"])
+def test_les_lignes_de_base_produisent_un_resultat_utilisable(methode):
+    b = obj.Budget(300)
+    fonction = (baselines.recherche_aleatoire if methode == "aleatoire"
+                else baselines.hill_climbing)
+    r = fonction(0, b)
+    assert r.historique_meilleur
+    assert r.historique_meilleur == sorted(r.historique_meilleur)
+    assert len(r.archive) > 0
+    assert r.historique_evaluations[-1] == 300
 
 
-def test_verificador_pega_nota_adulterada():
-    """O erro que o verificador existe para encontrar."""
-    r = ga.evoluir(semente=0, **PEQUENO)
-    registro = [a.como_dict() for a in r.arquivo.itens.values()]
-    registro[0]["qed"] = 0.99
-    problemas = verifier.verificar(registro)
-    assert any(p.tipo == "qed_divergente" for p in problemas)
+def test_hill_climbing_avec_redemarrages_fonctionne_aussi():
+    b = obj.Budget(300)
+    r = baselines.hill_climbing(0, b, redemarrages=True, patience=20)
+    assert r.meilleure_aptitude > 0
+    assert "redemarrages" in r.methode
 
 
-def test_verificador_pega_duplicata():
-    r = ga.evoluir(semente=0, **PEQUENO)
-    registro = [a.como_dict() for a in r.arquivo.itens.values()]
-    registro.append(dict(registro[0]))
-    assert any(p.tipo == "duplicado" for p in verifier.verificar(registro))
+# --------------------------------------------------------------------------
+# Verificateur
+# --------------------------------------------------------------------------
+
+def test_le_verificateur_approuve_un_registre_honnete():
+    r = ga.evoluer(graine=0, **PETIT)
+    registre = [t.en_dict() for t in r.archive.items.values()]
+    assert verifier.verifier_registre(registre) == []
 
 
-def test_verificador_pega_smiles_ilegivel():
-    problemas = verifier.verificar([{"smiles": "isto nao e um smiles"}])
-    assert any(p.tipo == "smiles_ilegivel" for p in problemas)
+def test_le_verificateur_attrape_une_note_falsifiee():
+    """L'erreur pour laquelle le verificateur existe."""
+    r = ga.evoluer(graine=0, **PETIT)
+    registre = [t.en_dict() for t in r.archive.items.values()]
+    registre[0]["qed"] = round(min(1.0, registre[0]["qed"] + 0.1), 6)
+    problemes = verifier.verifier_registre(registre)
+    assert any(p.type == "qed_divergent" for p in problemes)
 
 
-def test_verificador_pega_frente_dominada():
-    frente_errada = [
+def test_le_verificateur_attrape_un_doublon():
+    r = ga.evoluer(graine=0, **PETIT)
+    registre = [t.en_dict() for t in r.archive.items.values()]
+    registre.append(dict(registre[0]))
+    assert any(p.type == "doublon"
+               for p in verifier.verifier_registre(registre))
+
+
+def test_le_verificateur_attrape_un_smiles_illisible():
+    problemes = verifier.verifier_registre([{"smiles": "ceci n'est pas un smiles"}])
+    assert any(p.type == "smiles_illisible" for p in problemes)
+
+
+def test_le_verificateur_attrape_un_front_domine():
+    front_faux = [
         {"smiles": "CCO", "qed": 0.8, "sa_norm": 0.8},
-        {"smiles": "CCC", "qed": 0.5, "sa_norm": 0.5},   # dominada pela primeira
+        {"smiles": "CCC", "qed": 0.5, "sa_norm": 0.5},   # dominee par la premiere
     ]
-    problemas = verifier.verificar_frente(frente_errada)
-    assert any(p.tipo == "frente_dominada" for p in problemas)
+    problemes = verifier.verifier_front(front_faux)
+    assert any(p.type == "front_domine" for p in problemes)
 
 
-def test_verificador_aceita_frente_legitima():
-    frente_ok = [
+def test_le_verificateur_accepte_un_front_legitime():
+    front_ok = [
         {"smiles": "CCO", "qed": 0.8, "sa_norm": 0.2},
         {"smiles": "CCC", "qed": 0.2, "sa_norm": 0.8},
     ]
-    assert verifier.verificar_frente(frente_ok) == []
+    assert verifier.verifier_front(front_ok) == []
 
 
-def test_registro_sobrevive_a_ida_e_volta_pelo_json(tmp_path):
-    r = ga.evoluir(semente=0, **PEQUENO)
-    caminho = tmp_path / "registro.jsonl"
-    with open(caminho, "w", encoding="utf-8") as f:
-        for a in r.arquivo.itens.values():
-            f.write(json.dumps(a.como_dict(), ensure_ascii=False) + "\n")
-    assert verifier.verificar(verifier.carregar_jsonl(str(caminho))) == []
+def test_le_registre_survit_a_l_aller_retour_json(tmp_path):
+    r = ga.evoluer(graine=0, **PETIT)
+    chemin = tmp_path / "registre.jsonl"
+    with open(chemin, "w", encoding="utf-8") as f:
+        for t in r.archive.items.values():
+            f.write(json.dumps(t.en_dict(), ensure_ascii=False) + "\n")
+    assert verifier.verifier_registre(
+        verifier.charger_jsonl(str(chemin))) == []

@@ -1,9 +1,10 @@
-"""Testes das funcoes objetivo e do orcamento.
+"""Tests des fonctions objectif et du budget.
 
-O erro de sinal na normalizacao do SA e o bug mais provavel deste
-projeto: as duas notas tem direcoes opostas, e trocar uma pela outra
-produz um programa que roda, converge e otimiza exatamente o contrario
-do pretendido, sem avisar. Daí os testes de direcao abaixo.
+L'erreur de signe dans la normalisation du SA est le bug le plus probable de
+ce projet : les deux notes ont des directions opposees, et les intervertir
+produit un programme qui tourne, converge et optimise exactement le
+contraire de ce qui est voulu, sans prevenir. D'ou les tests de direction
+ci-dessous.
 """
 
 import pytest
@@ -11,149 +12,150 @@ import pytest
 from src import objectives as obj
 from src import representation as rep
 
-ASPIRINA = "CC(=O)Oc1ccccc1C(=O)O"
-CAFEINA = "Cn1cnc2c1c(=O)n(C)c(=O)n2C"
+ASPIRINE = "CC(=O)Oc1ccccc1C(=O)O"
+CAFEINE = "Cn1cnc2c1c(=O)n(C)c(=O)n2C"
 
 
 # --------------------------------------------------------------------------
-# Normalizacao do SA
+# Normalisation du SA
 # --------------------------------------------------------------------------
 
-def test_sa_norm_nos_extremos():
-    assert obj.normalizar_sa(1.0) == pytest.approx(1.0)
-    assert obj.normalizar_sa(10.0) == pytest.approx(0.0)
+def test_sa_norm_aux_extremes():
+    assert obj.normaliser_sa(1.0) == pytest.approx(1.0)
+    assert obj.normaliser_sa(10.0) == pytest.approx(0.0)
 
 
-def test_sa_norm_inverte_a_direcao():
-    # SA menor = mais facil de fazer = sa_norm MAIOR.
-    assert obj.normalizar_sa(2.0) > obj.normalizar_sa(8.0)
+def test_sa_norm_inverse_la_direction():
+    # SA plus bas = plus facile a faire = sa_norm PLUS HAUT.
+    assert obj.normaliser_sa(2.0) > obj.normaliser_sa(8.0)
 
 
-def test_sa_norm_fica_preso_no_intervalo():
-    assert obj.normalizar_sa(-5.0) == 1.0
-    assert obj.normalizar_sa(99.0) == 0.0
+def test_sa_norm_reste_dans_l_intervalle():
+    assert obj.normaliser_sa(-5.0) == 1.0
+    assert obj.normaliser_sa(99.0) == 0.0
 
 
 # --------------------------------------------------------------------------
-# Notas
+# Notes
 # --------------------------------------------------------------------------
 
-def test_notas_de_uma_molecula_conhecida():
-    n = obj.notas(rep.de_smiles(ASPIRINA))
-    assert n.valida
+def test_notes_d_une_molecule_connue():
+    n = obj.notes(rep.depuis_smiles(ASPIRINE))
+    assert n.valide
     assert 0.0 <= n.qed <= 1.0
     assert 1.0 <= n.sa <= 10.0
     assert 0.0 <= n.sa_norm <= 1.0
 
 
-def test_aspirina_e_facil_de_sintetizar():
-    """Teste de sanidade com resposta conhecida.
+def test_aspirine_est_facile_a_synthetiser():
+    """Test de bon sens a reponse connue.
 
-    A aspirina e uma das moleculas mais simples da farmacopeia. Se o SA
-    dela sair alto, o sascorer foi carregado errado.
+    L'aspirine est l'une des molecules les plus simples de la pharmacopee.
+    Si son SA ressort eleve, c'est que sascorer a ete charge de travers.
     """
-    n = obj.notas(rep.de_smiles(ASPIRINA))
-    assert n.sa < 4.0, f"SA da aspirina = {n.sa}, esperado baixo"
+    n = obj.notes(rep.depuis_smiles(ASPIRINE))
+    assert n.sa < 4.0, f"SA de l'aspirine = {n.sa}, attendu bas"
     assert n.sa_norm > 0.6
 
 
-def test_objetivos_sao_o_par_para_maximizar():
-    n = obj.notas(rep.de_smiles(CAFEINA))
-    assert n.objetivos == (n.qed, n.sa_norm)
+def test_objectifs_sont_le_couple_a_maximiser():
+    n = obj.notes(rep.depuis_smiles(CAFEINE))
+    assert n.objectifs == (n.qed, n.sa_norm)
 
 
-def test_notas_invalidas_nao_quebram_nada():
-    assert obj.NOTAS_INVALIDAS.valida is False
-    assert obj.NOTAS_INVALIDAS.qed == 0.0
-    assert obj.NOTAS_INVALIDAS.sa_norm == 0.0
+def test_notes_invalides_ne_cassent_rien():
+    assert obj.NOTES_INVALIDES.valide is False
+    assert obj.NOTES_INVALIDES.qed == 0.0
+    assert obj.NOTES_INVALIDES.sa_norm == 0.0
 
 
-def test_cadeia_degenerada_nao_levanta():
-    """O bug que parou uma execucao no Colab.
+def test_chaine_degeneree_ne_leve_pas():
+    """Le bug qui a interrompu une execution dans Colab.
 
-    `[Ring1]` decodifica para um SMILES vazio. `MolFromSmiles("")` devolve
-    uma molecula sem atomos, nao None; o sascorer devolvia None para ela e
-    `float(None)` levantava TypeError no meio da terceira geracao.
+    `[Ring1]` se decode en SMILES vide. `MolFromSmiles("")` renvoie une
+    molecule sans atome, pas None ; le sascorer renvoyait None pour elle et
+    `float(None)` levait TypeError au milieu de la troisieme generation.
     """
-    n = obj.notas("[Ring1]")
-    assert n.valida is False
+    n = obj.notes("[Ring1]")
+    assert n.valide is False
     assert n.qed == 0.0
     assert n.sa_norm == 0.0
 
 
-def test_aptidao_de_cadeia_degenerada_e_zero():
-    """A aptidao tem de ser um numero: o torneio compara com `max`."""
-    a = obj.aptidao("[Ring1]")
+def test_aptitude_d_une_chaine_degeneree_est_nulle():
+    """L'aptitude doit rester un nombre : le tournoi compare avec `max`."""
+    a = obj.aptitude("[Ring1]")
     assert isinstance(a, float)
     assert a == 0.0
 
 
-@pytest.mark.parametrize("cadeia", ["[Ring1]", "[Ring2]", "[Branch1]", "[#Branch2]"])
-def test_fichas_sozinhas_nunca_quebram(cadeia):
-    """Qualquer ficha isolada tem de ser pontuavel sem excecao."""
-    n = obj.notas(cadeia)
+@pytest.mark.parametrize("chaine", ["[Ring1]", "[Ring2]", "[Branch1]", "[#Branch2]"])
+def test_jetons_isoles_ne_cassent_jamais(chaine):
+    """N'importe quel jeton isole doit pouvoir etre note sans exception."""
+    n = obj.notes(chaine)
     assert isinstance(n.qed, float)
     assert isinstance(n.sa, float)
     assert isinstance(n.sa_norm, float)
 
 
 # --------------------------------------------------------------------------
-# Aptidao
+# Aptitude
 # --------------------------------------------------------------------------
 
-def test_aptidao_fica_entre_zero_e_um():
-    cadeia = rep.de_smiles(ASPIRINA)
+def test_aptitude_reste_entre_zero_et_un():
+    chaine = rep.depuis_smiles(ASPIRINE)
     for w in (0.0, 0.25, 0.5, 0.75, 1.0):
-        assert 0.0 <= obj.aptidao(cadeia, peso_qed=w) <= 1.0
+        assert 0.0 <= obj.aptitude(chaine, poids_qed=w) <= 1.0
 
 
-def test_peso_um_usa_so_o_qed():
-    cadeia = rep.de_smiles(ASPIRINA)
-    n = obj.notas(cadeia)
-    assert obj.aptidao(cadeia, peso_qed=1.0) == pytest.approx(n.qed)
+def test_poids_un_n_utilise_que_le_qed():
+    chaine = rep.depuis_smiles(ASPIRINE)
+    n = obj.notes(chaine)
+    assert obj.aptitude(chaine, poids_qed=1.0) == pytest.approx(n.qed)
 
 
-def test_peso_zero_usa_so_a_sintese():
-    cadeia = rep.de_smiles(ASPIRINA)
-    n = obj.notas(cadeia)
-    assert obj.aptidao(cadeia, peso_qed=0.0) == pytest.approx(n.sa_norm)
+def test_poids_zero_n_utilise_que_la_synthese():
+    chaine = rep.depuis_smiles(ASPIRINE)
+    n = obj.notes(chaine)
+    assert obj.aptitude(chaine, poids_qed=0.0) == pytest.approx(n.sa_norm)
 
 
 # --------------------------------------------------------------------------
-# Orcamento
+# Budget
 # --------------------------------------------------------------------------
 
-def test_orcamento_conta_cada_avaliacao():
-    o = obj.Orcamento(3)
-    cadeia = rep.de_smiles("CCO")
+def test_budget_compte_chaque_evaluation():
+    b = obj.Budget(3)
+    chaine = rep.depuis_smiles("CCO")
     for _ in range(3):
-        obj.notas(cadeia, o)
-    assert o.usadas == 3
-    assert o.esgotado
-    assert o.restantes == 0
+        obj.notes(chaine, b)
+    assert b.utilisees == 3
+    assert b.epuise
+    assert b.restantes == 0
 
 
-def test_orcamento_comeca_vazio():
-    o = obj.Orcamento(10)
-    assert not o.esgotado
-    assert o.restantes == 10
+def test_budget_commence_vide():
+    b = obj.Budget(10)
+    assert not b.epuise
+    assert b.restantes == 10
 
 
-def test_orcamento_nao_fica_negativo():
-    o = obj.Orcamento(2)
-    o.gastar(5)
-    assert o.restantes == 0
+def test_budget_ne_devient_pas_negatif():
+    b = obj.Budget(2)
+    b.depenser(5)
+    assert b.restantes == 0
 
 
-def test_cache_nao_altera_a_contagem_do_orcamento():
-    """O cache economiza tempo, nao orcamento.
+def test_le_cache_ne_change_pas_le_compte_du_budget():
+    """Le cache economise du temps, pas du budget.
 
-    Se ele economizasse orcamento, dois metodos com o mesmo limite fariam
-    numeros diferentes de avaliacoes reais e a comparacao seria injusta.
+    S'il economisait du budget, deux methodes ayant la meme limite feraient
+    des nombres differents d'evaluations reelles et la comparaison serait
+    injuste.
     """
-    obj.limpar_cache()
-    o = obj.Orcamento(100)
-    cadeia = rep.de_smiles(ASPIRINA)
+    obj.vider_cache()
+    b = obj.Budget(100)
+    chaine = rep.depuis_smiles(ASPIRINE)
     for _ in range(10):
-        obj.notas(cadeia, o)
-    assert o.usadas == 10
+        obj.notes(chaine, b)
+    assert b.utilisees == 10

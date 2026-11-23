@@ -1,120 +1,120 @@
-"""Dominancia, frente de Pareto e hipervolume.
+"""Dominance, front de Pareto et hypervolume.
 
-Este modulo e puro: trabalha com tuplas de numeros e nao importa RDKit
-nem selfies. Isso o torna o mais facil de testar com respostas conhecidas
-calculadas a mao -- e e por isso que os testes dele sao os mais valiosos
-do projeto.
+Ce module est pur : il travaille sur des tuples de nombres et n'importe ni
+RDKit ni selfies. C'est le plus facile a tester avec des reponses connues
+calculees a la main -- et c'est pour cela que ses tests sont les plus
+precieux du projet.
 
-Convencao em todo o modulo: TODOS os objetivos sao para MAXIMIZAR.
-O SA score, que e para minimizar, ja entra convertido em `sa_norm` pelo
-modulo objectives. Misturar as direcoes e o erro classico aqui.
+Convention dans tout le module : TOUS les objectifs sont a MAXIMISER.
+Le SA score, qui est a minimiser, arrive deja converti en `sa_norm` par le
+module objectives. Melanger les directions est l'erreur classique ici.
 """
 
 from __future__ import annotations
 
 from typing import Sequence
 
-Ponto = Sequence[float]
+Point = Sequence[float]
 
 
-def domina(a: Ponto, b: Ponto) -> bool:
-    """A domina B: melhor ou igual em tudo, estritamente melhor em algo."""
-    melhor_ou_igual = all(x >= y for x, y in zip(a, b))
-    estritamente_melhor = any(x > y for x, y in zip(a, b))
-    return melhor_ou_igual and estritamente_melhor
+def domine(a: Point, b: Point) -> bool:
+    """A domine B : au moins aussi bon partout, strictement meilleur quelque part."""
+    au_moins_egal = all(x >= y for x, y in zip(a, b))
+    strictement_meilleur = any(x > y for x, y in zip(a, b))
+    return au_moins_egal and strictement_meilleur
 
 
-def indices_nao_dominados(pontos: Sequence[Ponto]) -> list[int]:
-    """Indices da frente de Pareto.
+def indices_non_domines(points: Sequence[Point]) -> list[int]:
+    """Indices du front de Pareto.
 
-    Complexidade quadratica. Para as centenas ou milhares de pontos deste
-    projeto isso e irrelevante; se um dia passar de ~1e5, troque por um
-    algoritmo de varredura.
+    Complexite quadratique. Pour les centaines ou milliers de points de ce
+    projet, c'est sans importance ; au-dela de ~1e5, passer a un algorithme
+    par balayage.
     """
     return [
         i
-        for i, p in enumerate(pontos)
-        if not any(domina(q, p) for j, q in enumerate(pontos) if j != i)
+        for i, p in enumerate(points)
+        if not any(domine(q, p) for j, q in enumerate(points) if j != i)
     ]
 
 
-def frente(pontos: Sequence[Ponto]) -> list[Ponto]:
-    return [pontos[i] for i in indices_nao_dominados(pontos)]
+def front(points: Sequence[Point]) -> list[Point]:
+    return [points[i] for i in indices_non_domines(points)]
 
 
-def camadas(pontos: Sequence[Ponto]) -> list[list[int]]:
-    """Ordenacao por camadas de dominancia, como no NSGA-II.
+def couches(points: Sequence[Point]) -> list[list[int]]:
+    """Tri par couches de dominance, comme dans NSGA-II.
 
-    Camada 0 e a frente de Pareto; camada 1 e a frente do que sobra; e
-    assim por diante. Camada mais baixa, melhor.
+    La couche 0 est le front de Pareto ; la couche 1 est le front de ce qui
+    reste ; et ainsi de suite. Couche plus basse, meilleur.
     """
-    restantes = list(range(len(pontos)))
-    saida: list[list[int]] = []
-    while restantes:
-        sub = [pontos[i] for i in restantes]
-        locais = set(indices_nao_dominados(sub))
-        camada = [restantes[i] for i in sorted(locais)]
-        saida.append(camada)
-        restantes = [r for k, r in enumerate(restantes) if k not in locais]
-    return saida
+    restants = list(range(len(points)))
+    sortie: list[list[int]] = []
+    while restants:
+        sous = [points[i] for i in restants]
+        locaux = set(indices_non_domines(sous))
+        couche = [restants[i] for i in sorted(locaux)]
+        sortie.append(couche)
+        restants = [r for k, r in enumerate(restants) if k not in locaux]
+    return sortie
 
 
-def distancia_aglomeracao(pontos: Sequence[Ponto]) -> list[float]:
-    """Distancia de aglomeracao do NSGA-II, para desempatar dentro da camada.
+def distance_agglomeration(points: Sequence[Point]) -> list[float]:
+    """Distance d'agglomeration de NSGA-II, pour departager dans une couche.
 
-    Pontos em regioes vazias da frente recebem distancia maior e sao
-    preferidos, de modo que a frente se espalhe em vez de se amontoar.
-    Os extremos recebem infinito e sao sempre preservados.
+    Les points situes dans les zones vides du front recoivent une distance
+    plus grande et sont preferes, de sorte que le front s'etale au lieu de
+    s'entasser. Les extremes recoivent l'infini et sont toujours preserves.
     """
-    n = len(pontos)
+    n = len(points)
     if n == 0:
         return []
     if n <= 2:
         return [float("inf")] * n
 
-    n_obj = len(pontos[0])
+    n_obj = len(points[0])
     dist = [0.0] * n
     for m in range(n_obj):
-        ordem = sorted(range(n), key=lambda i: pontos[i][m])
-        dist[ordem[0]] = float("inf")
-        dist[ordem[-1]] = float("inf")
-        menor = pontos[ordem[0]][m]
-        maior = pontos[ordem[-1]][m]
-        faixa = maior - menor
-        if faixa == 0:
+        ordre = sorted(range(n), key=lambda i: points[i][m])
+        dist[ordre[0]] = float("inf")
+        dist[ordre[-1]] = float("inf")
+        mini = points[ordre[0]][m]
+        maxi = points[ordre[-1]][m]
+        plage = maxi - mini
+        if plage == 0:
             continue
         for k in range(1, n - 1):
-            if dist[ordem[k]] == float("inf"):
+            if dist[ordre[k]] == float("inf"):
                 continue
-            anterior = pontos[ordem[k - 1]][m]
-            seguinte = pontos[ordem[k + 1]][m]
-            dist[ordem[k]] += (seguinte - anterior) / faixa
+            precedent = points[ordre[k - 1]][m]
+            suivant = points[ordre[k + 1]][m]
+            dist[ordre[k]] += (suivant - precedent) / plage
     return dist
 
 
-def hipervolume_2d(pontos: Sequence[Ponto], referencia: Ponto = (0.0, 0.0)) -> float:
-    """Area dominada pela frente em relacao a um ponto de referencia.
+def hypervolume_2d(points: Sequence[Point], reference: Point = (0.0, 0.0)) -> float:
+    """Aire dominee par le front relativement a un point de reference.
 
-    Um numero so para comparar duas frentes inteiras: maior e melhor.
-    Vale apenas para dois objetivos, que e o caso deste projeto.
+    Un seul nombre pour comparer deux fronts entiers : plus grand est
+    meilleur. Valable pour deux objectifs, ce qui est le cas de ce projet.
 
-    O ponto de referencia tem de ser o MESMO em todas as comparacoes do
-    relatorio, senao os numeros nao querem dizer nada. (0, 0) e a escolha
-    natural aqui, porque os dois objetivos ja vivem em 0..1.
+    Le point de reference doit etre le MEME dans toutes les comparaisons du
+    rapport, sinon les nombres ne veulent rien dire. (0, 0) est le choix
+    naturel ici, les deux objectifs vivant deja dans 0..1.
     """
-    uteis = [
-        p for p in frente(pontos)
-        if p[0] > referencia[0] and p[1] > referencia[1]
+    utiles = [
+        p for p in front(points)
+        if p[0] > reference[0] and p[1] > reference[1]
     ]
-    if not uteis:
+    if not utiles:
         return 0.0
 
-    # Varredura da direita para a esquerda, somando faixas retangulares.
-    uteis.sort(key=lambda p: p[0], reverse=True)
-    area = 0.0
-    y_anterior = referencia[1]
-    for x, y in uteis:
-        if y > y_anterior:
-            area += (x - referencia[0]) * (y - y_anterior)
-            y_anterior = y
-    return area
+    # Balayage de droite a gauche, en sommant des bandes rectangulaires.
+    utiles.sort(key=lambda p: p[0], reverse=True)
+    aire = 0.0
+    y_precedent = reference[1]
+    for x, y in utiles:
+        if y > y_precedent:
+            aire += (x - reference[0]) * (y - y_precedent)
+            y_precedent = y
+    return aire

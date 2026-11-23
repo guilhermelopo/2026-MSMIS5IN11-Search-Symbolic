@@ -1,16 +1,17 @@
-"""Medidas de diversidade.
+"""Mesures de diversite.
 
-O algoritmo genetico converge, e isso nao e so bom: depois de algumas
-dezenas de geracoes a populacao vira copias do mesmo vencedor. A curva de
-aptidao fica otima e o resultado deixa de ser uma busca.
+L'algorithme genetique converge, et ce n'est pas seulement une bonne chose :
+apres quelques dizaines de generations, la population devient des copies du
+meme gagnant. La courbe d'aptitude est excellente et le resultat cesse
+d'etre une recherche.
 
-Para descoberta de farmacos isso e um fracasso disfarcado: o objetivo
-nunca foi uma molecula, e sim um conjunto de candidatos diferentes entre
-si, porque a maioria vai falhar depois por motivos que nenhuma destas
-formulas preve.
+Pour la decouverte de medicaments, c'est un echec deguise : l'objectif n'a
+jamais ete *une* molecule, mais un ensemble de candidats differents, car la
+plupart echoueront plus tard pour des raisons qu'aucune de ces formules ne
+prevoit.
 
-Reportar a curva de aptidao junto com a de diversidade e uma das figuras
-mais fortes que este projeto pode produzir.
+Reporter la courbe d'aptitude a cote de celle de diversite est l'une des
+figures les plus fortes que ce projet puisse produire.
 """
 
 from __future__ import annotations
@@ -20,61 +21,61 @@ from rdkit.Chem import AllChem
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
 
-def impressao(smiles: str, raio: int = 2, bits: int = 2048):
-    """Impressao digital de Morgan (ECFP4 para raio=2).
+def empreinte(smiles: str, rayon: int = 2, bits: int = 2048):
+    """Empreinte moleculaire de Morgan (ECFP4 pour rayon=2).
 
-    Um vetor de bits em que cada bit indica a presenca de uma subestrutura
-    centrada num atomo, ate `raio` ligacoes de distancia.
+    Un vecteur de bits ou chaque bit indique la presence d'une sous-structure
+    centree sur un atome, jusqu'a `rayon` liaisons de distance.
     """
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         return None
-    return AllChem.GetMorganFingerprintAsBitVect(mol, radius=raio, nBits=bits)
+    return AllChem.GetMorganFingerprintAsBitVect(mol, radius=rayon, nBits=bits)
 
 
-def diversidade_interna(lista_smiles: list[str]) -> float:
-    """1 menos a semelhanca media de Tanimoto entre todos os pares.
+def diversite_interne(liste_smiles: list[str]) -> float:
+    """1 moins la similarite moyenne de Tanimoto sur toutes les paires.
 
-    1.0 = tudo diferente, 0.0 = clones. Custo quadratico no numero de
-    moleculas; para populacoes grandes, amostre.
+    1.0 = tout different, 0.0 = des clones. Cout quadratique en nombre de
+    molecules ; pour de grandes populations, echantillonner.
     """
-    fps = [f for f in (impressao(s) for s in lista_smiles) if f is not None]
-    if len(fps) < 2:
+    emp = [e for e in (empreinte(s) for s in liste_smiles) if e is not None]
+    if len(emp) < 2:
         return 0.0
     sims: list[float] = []
-    for i in range(len(fps)):
-        sims.extend(DataStructs.BulkTanimotoSimilarity(fps[i], fps[i + 1:]))
+    for i in range(len(emp)):
+        sims.extend(DataStructs.BulkTanimotoSimilarity(emp[i], emp[i + 1:]))
     return 1.0 - sum(sims) / len(sims)
 
 
-def esqueleto(smiles: str) -> str | None:
-    """Esqueleto de Bemis-Murcko: a molecula sem as cadeias laterais."""
+def squelette(smiles: str) -> str | None:
+    """Squelette de Bemis-Murcko : la molecule sans ses chaines laterales."""
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         return None
     try:
-        nucleo = MurckoScaffold.GetScaffoldForMol(mol)
-        return Chem.MolToSmiles(nucleo)
-    except Exception:  # noqa: BLE001 - moleculas sem anel podem falhar
+        noyau = MurckoScaffold.GetScaffoldForMol(mol)
+        return Chem.MolToSmiles(noyau)
+    except Exception:  # noqa: BLE001 - les molecules sans cycle peuvent echouer
         return None
 
 
-def contar_esqueletos(lista_smiles: list[str]) -> int:
-    """Quantos esqueletos distintos existem no conjunto.
+def compter_squelettes(liste_smiles: list[str]) -> int:
+    """Combien de squelettes distincts existent dans l'ensemble.
 
-    Medida mais interpretavel para um quimico do que o Tanimoto medio:
-    cem moleculas com tres esqueletos e pouca diversidade real, por mais
-    que a semelhanca media nao pareca tao alta.
+    Mesure plus parlante pour un chimiste que le Tanimoto moyen : cent
+    molecules reparties sur trois squelettes, c'est peu de diversite reelle,
+    meme si la similarite moyenne ne parait pas si elevee.
     """
-    return len({e for e in (esqueleto(s) for s in lista_smiles) if e})
+    return len({s for s in (squelette(x) for x in liste_smiles) if s})
 
 
-def resumo(lista_smiles: list[str]) -> dict:
-    """As tres medidas de uma vez, pronto para gravar no registro."""
-    distintas = sorted(set(lista_smiles))
+def resume(liste_smiles: list[str]) -> dict:
+    """Les trois mesures d'un coup, pretes a ecrire dans le registre."""
+    distinctes = sorted(set(liste_smiles))
     return {
-        "n_moleculas": len(lista_smiles),
-        "n_distintas": len(distintas),
-        "diversidade_interna": diversidade_interna(distintas),
-        "n_esqueletos": contar_esqueletos(distintas),
+        "n_molecules": len(liste_smiles),
+        "n_distinctes": len(distinctes),
+        "diversite_interne": diversite_interne(distinctes),
+        "n_squelettes": compter_squelettes(distinctes),
     }

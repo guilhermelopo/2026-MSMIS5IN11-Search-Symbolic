@@ -1,4 +1,4 @@
-# Ambientes
+# Environnements
 .venv/
 venv/
 env/
@@ -9,26 +9,26 @@ __pycache__/
 .pytest_cache/
 *.egg-info/
 
-# Segredos
+# Secrets
 .env
 
-# Saidas da execucao: reproduziveis a partir do codigo e da semente
-resultados/
+# Sorties d'execution : reproductibles depuis le code et la graine
+resultats/
 *.jsonl
 
-# Dados baixados: so o script de download e versionado
+# Donnees telechargees : seul le script de telechargement est versionne
 data/*
 !data/README.md
 
 # Notebooks
 .ipynb_checkpoints/
 
-# Sistema
-.DS_Store
-Thumbs.db
-
-# As figuras e o dossier de resultats SAO versionados de proposito:
-# o relecteur da PR precisa ve-los sem executar o notebook.
+# Les figures et le dossier de resultats SONT versionnes a dessein :
+# le relecteur de la PR doit les voir sans executer le notebook.
 !notebooks/*.png
 !notebooks/RESULTATS.md
 !notebooks/mesures.json
+
+# Systeme
+.DS_Store
+Thumbs.db
