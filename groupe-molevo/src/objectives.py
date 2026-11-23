@@ -123,10 +123,24 @@ def _notas_por_smiles(smiles_canonico: str) -> Notas:
     from rdkit import Chem
 
     mol = Chem.MolFromSmiles(smiles_canonico)
-    if mol is None:
+    # `MolFromSmiles("")` devolve uma molecula VAZIA, nao None. Sem o teste
+    # de numero de atomos, ela chega ao QED e ao sascorer, que devolvem
+    # None -- e `float(None)` levanta TypeError.
+    if mol is None or mol.GetNumAtoms() == 0:
         return NOTAS_INVALIDAS
-    sa = float(_carregar_sascorer().calculateScore(mol))
-    return Notas(qed=float(QED.qed(mol)), sa=sa, sa_norm=normalizar_sa(sa))
+
+    try:
+        sa_bruto = _carregar_sascorer().calculateScore(mol)
+        qed_bruto = QED.qed(mol)
+    except Exception:  # noqa: BLE001 - molecula exotica recusada pelos scores
+        return NOTAS_INVALIDAS
+
+    # Os dois podem devolver None para moleculas degeneradas, sem levantar.
+    if sa_bruto is None or qed_bruto is None:
+        return NOTAS_INVALIDAS
+
+    sa = float(sa_bruto)
+    return Notas(qed=float(qed_bruto), sa=sa, sa_norm=normalizar_sa(sa))
 
 
 def notas(cadeia: str, orcamento: Orcamento | None = None) -> Notas:

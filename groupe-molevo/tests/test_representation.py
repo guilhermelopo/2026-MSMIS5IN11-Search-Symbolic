@@ -56,14 +56,53 @@ def test_cadeias_diferentes_podem_dar_a_mesma_molecula():
 # --------------------------------------------------------------------------
 
 def test_robustez_do_alfabeto():
-    """Toda sequencia de fichas do alfabeto robusto e uma molecula valida."""
+    """A promessa do SELFIES: toda sequencia de fichas DECODIFICA.
+
+    E esta a propriedade exata que a biblioteca garante, e e so ela que o
+    algoritmo genetico precisa: nenhuma mutacao produz uma cadeia que o
+    decodificador recuse.
+    """
     rng = random.Random(0)
-    invalidas = []
+    falhas = []
     for _ in range(2000):
         cadeia = rep.aleatoria(rng, n_min=1, n_max=30)
-        if not rep.valida(cadeia):
-            invalidas.append(cadeia)
-    assert not invalidas, f"{len(invalidas)} cadeias invalidas, ex.: {invalidas[:3]}"
+        if not rep.decodifica_ok(cadeia):
+            falhas.append(cadeia)
+    assert not falhas, f"{len(falhas)} cadeias nao decodificam, ex.: {falhas[:3]}"
+
+
+def test_cadeias_longas_dao_moleculas_com_atomos():
+    """Decodificar sempre funciona, mas pode dar molecula VAZIA.
+
+    Uma cadeia de uma ficha so pode ser degenerada (`[Ring1]` nao tem
+    atomo). Com algumas fichas isso praticamente nao acontece -- e e por
+    isso que a populacao inicial nunca usa n_min=1.
+    """
+    rng = random.Random(0)
+    sem_atomo = [c for _ in range(500)
+                 if not rep.valida(c := rep.aleatoria(rng, n_min=6, n_max=30))]
+    assert len(sem_atomo) < 25, (
+        f"{len(sem_atomo)}/500 cadeias sem atomo, ex.: {sem_atomo[:3]}")
+
+
+def test_molecula_vazia_e_rejeitada():
+    """A armadilha que causou um TypeError em producao.
+
+    `Chem.MolFromSmiles("")` devolve uma molecula VAZIA, nao None. Se ela
+    passar, o QED e o SA score recebem zero atomos e devolvem None, e
+    `float(None)` levanta TypeError. `para_mol` tem de devolver None.
+    """
+    from rdkit import Chem
+
+    vazia = Chem.MolFromSmiles("")
+    assert vazia is not None, "o RDKit mudou: MolFromSmiles('') agora da None"
+    assert vazia.GetNumAtoms() == 0
+
+    # `[Ring1]` sozinha: uma ficha de fechamento de anel sem nenhum atomo.
+    assert rep.decodifica_ok("[Ring1]")      # decodifica, como prometido
+    assert not rep.valida("[Ring1]")         # mas nao tem atomo
+    assert rep.para_mol("[Ring1]") is None
+    assert rep.canonico("[Ring1]") is None   # nunca a cadeia vazia
 
 
 def test_alfabeto_nao_e_vazio_e_e_estavel():

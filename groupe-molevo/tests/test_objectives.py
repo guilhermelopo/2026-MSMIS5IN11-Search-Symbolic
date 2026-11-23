@@ -68,6 +68,35 @@ def test_notas_invalidas_nao_quebram_nada():
     assert obj.NOTAS_INVALIDAS.sa_norm == 0.0
 
 
+def test_cadeia_degenerada_nao_levanta():
+    """O bug que parou uma execucao no Colab.
+
+    `[Ring1]` decodifica para um SMILES vazio. `MolFromSmiles("")` devolve
+    uma molecula sem atomos, nao None; o sascorer devolvia None para ela e
+    `float(None)` levantava TypeError no meio da terceira geracao.
+    """
+    n = obj.notas("[Ring1]")
+    assert n.valida is False
+    assert n.qed == 0.0
+    assert n.sa_norm == 0.0
+
+
+def test_aptidao_de_cadeia_degenerada_e_zero():
+    """A aptidao tem de ser um numero: o torneio compara com `max`."""
+    a = obj.aptidao("[Ring1]")
+    assert isinstance(a, float)
+    assert a == 0.0
+
+
+@pytest.mark.parametrize("cadeia", ["[Ring1]", "[Ring2]", "[Branch1]", "[#Branch2]"])
+def test_fichas_sozinhas_nunca_quebram(cadeia):
+    """Qualquer ficha isolada tem de ser pontuavel sem excecao."""
+    n = obj.notas(cadeia)
+    assert isinstance(n.qed, float)
+    assert isinstance(n.sa, float)
+    assert isinstance(n.sa_norm, float)
+
+
 # --------------------------------------------------------------------------
 # Aptidao
 # --------------------------------------------------------------------------

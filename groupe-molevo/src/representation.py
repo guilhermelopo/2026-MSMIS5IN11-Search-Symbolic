@@ -63,13 +63,37 @@ def de_smiles(smiles: str) -> str:
 
 
 @lru_cache(maxsize=200_000)
-def para_mol(cadeia: str):
-    """SELFIES -> objeto Mol do RDKit, ou None se algo der errado.
+def decodifica_ok(cadeia: str) -> bool:
+    """A cadeia decodifica sem erro? (molecula vazia conta como sucesso.)
 
-    Em teoria nunca devolve None. Na pratica, registre quando acontecer:
-    e sinal de uma ficha fora do alfabeto robusto.
+    E esta a propriedade que o SELFIES garante: a decodificacao nunca
+    falha. Use `valida` quando precisar de uma molecula com atomos.
     """
-    return Chem.MolFromSmiles(sf.decoder(cadeia))
+    try:
+        return Chem.MolFromSmiles(sf.decoder(cadeia)) is not None
+    except Exception:  # noqa: BLE001 - ficha fora do alfabeto robusto
+        return False
+
+
+@lru_cache(maxsize=200_000)
+def para_mol(cadeia: str):
+    """SELFIES -> objeto Mol do RDKit com ao menos um atomo, ou None.
+
+    ARMADILHA: `Chem.MolFromSmiles("")` NAO devolve None -- devolve uma
+    molecula VAZIA, sem atomos. Uma cadeia SELFIES degenerada (uma ficha
+    de anel ou de indice sozinha, por exemplo `[Ring1]`) decodifica para
+    um SMILES vazio. Sem o teste de numero de atomos abaixo, essa
+    molecula vazia atravessa o `is None` e chega ao QED e ao SA score,
+    que devolvem valores indefinidos ou None -- era a origem do
+    `TypeError: float() argument must be ... not 'NoneType'`.
+    """
+    try:
+        mol = Chem.MolFromSmiles(sf.decoder(cadeia))
+    except Exception:  # noqa: BLE001
+        return None
+    if mol is None or mol.GetNumAtoms() == 0:
+        return None
+    return mol
 
 
 def canonico(cadeia: str) -> str | None:
@@ -79,10 +103,14 @@ def canonico(cadeia: str) -> str | None:
     Comparar as cadeias brutas conta duplicatas como se fossem distintas.
     """
     mol = para_mol(cadeia)
-    return Chem.MolToSmiles(mol) if mol is not None else None
+    if mol is None:
+        return None
+    can = Chem.MolToSmiles(mol)
+    return can or None          # nunca devolve a cadeia vazia
 
 
 def valida(cadeia: str) -> bool:
+    """A cadeia descreve uma molecula com ao menos um atomo."""
     return para_mol(cadeia) is not None
 
 
