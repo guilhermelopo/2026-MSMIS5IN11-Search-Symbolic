@@ -26,3 +26,9 @@ data/*
 # Sistema
 .DS_Store
 Thumbs.db
+
+# As figuras e o dossier de resultats SAO versionados de proposito:
+# o relecteur da PR precisa ve-los sem executar o notebook.
+!notebooks/*.png
+!notebooks/RESULTATS.md
+!notebooks/mesures.json
