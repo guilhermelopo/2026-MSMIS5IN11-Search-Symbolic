@@ -145,22 +145,134 @@ coller la sortie ici. Certains de ces 59 tests peuvent échouer : le code a ét�
 
 ## Résultats et évaluation
 
-**À COMPLÉTER.** Aucune molécule n'a encore été générée ; aucun QED ni SA n'a
-été calculé. `python medir.py` produit en une fois toutes les mesures
-attendues :
+Exécution du **23 novembre 2026** : 5 graines, population 60, 60 générations,
+3 600 évaluations par méthode et par graine, poids QED 0,5.
+RDKit 2026.09.2, selfies 2.1.1. Tous les chiffres ci-dessous viennent de
+`notebooks/RESULTATS.md`, régénéré par le notebook.
 
-| Mesure | Alimente |
-|---|---|
-| Validité sous mutation : SMILES contre SELFIES, 2 000 mutations chacun | la justification du projet |
-| QED et SA de six médicaments connus | l'échelle réelle des deux notes |
-| GA contre recherche aléatoire et hill climbing, 5 graines, même budget | le résultat principal |
-| Diversité interne et nombre de squelettes | la section diversité |
-| Front de Pareto et hypervolume | le multiobjectif |
-| Les cinq molécules au QED le plus élevé | la section limites |
+### 1. La représentation tient sa promesse
 
-Protocole attendu : budget en évaluations, graines fixées et consignées,
-moyenne et écart-type sur au moins cinq graines, comparaison à une ligne de
-base simple.
+| Représentation | Mutations donnant encore une molécule |
+|---|---:|
+| SMILES | **13,7 %** |
+| SELFIES | **100,0 %** |
+
+Facteur **×7,3**, sur 2 000 substitutions d'une unité appliquées à six
+médicaments connus. Les 100 % de SELFIES ne sont pas une performance de
+l'algorithme : c'est une propriété de la grammaire, obtenue par construction.
+Le chiffre de SMILES dépend de l'alphabet de substitution, donné dans la
+cellule correspondante du notebook.
+
+### 2. La recherche fonctionne, modestement
+
+| Méthode | Moyenne | Écart-type | Max | Molécules distinctes |
+|---|---:|---:|---:|---:|
+| **Algorithme génétique** | **0,7163** | 0,0305 | 0,7417 | 5 572 |
+| Hill climbing | 0,6640 | 0,0900 | 0,7514 | 4 977 |
+| Recherche aléatoire | 0,6262 | 0,0263 | 0,6656 | 12 908 |
+
+Écart GA − aléatoire : **+0,0901**, soit environ 3,4 écarts-types de la ligne
+de base. Le gain est réel et n'est pas du bruit.
+
+Deux nuances que la moyenne cache, et qu'il faut dire :
+
+- le **hill climbing a atteint un maximum supérieur** (0,7514 contre 0,7417)
+  sur une graine, avec trois fois l'écart-type du GA. Il est instable, pas
+  meilleur : le GA gagne en fiabilité, pas en pic ;
+- la **recherche aléatoire a trouvé plus du double de molécules distinctes**
+  (12 908 contre 5 572) à budget identique. Elle explore davantage ; elle ne
+  sait simplement pas où aller.
+
+### 3. Le test le plus sévère : les médicaments réels
+
+| Médicament | Molécules du front qu'il domine | Dominé par |
+|---|---:|---:|
+| Paracétamol | **18 / 38** | **0** |
+| Ibuprofène | 7 | **0** |
+| Pénicilline G | 2 | **0** |
+| Aspirine | 2 | **0** |
+| Caféine | 0 | 12 |
+| Atorvastatine | 0 | 36 |
+
+**Quatre des six médicaments ne sont dominés par aucune molécule du front.**
+Après 18 000 évaluations, la recherche n'a produit aucune structure qui soit
+à la fois plus proche d'un médicament oral *et* plus facile à synthétiser que
+le paracétamol — lequel domine à lui seul 18 entrées du front.
+
+Ce n'est pas un défaut du code : c'est la mesure honnête de ce que vaut le
+générateur, et elle situe la difficulté réelle du problème.
+
+### 4. Multiobjectif
+
+- Molécules distinctes évaluées par le GA : **5 572**
+- Front de Pareto : **25 molécules distinctes** (38 entrées avant
+  déduplication entre graines — voir « Défaut corrigé » ci-dessous)
+- Hypervolume, référence (0, 0) : **0,674**
+
+L'hypervolume n'est pas affecté par les doublons : une molécule répétée
+n'ajoute aucune aire dominée.
+
+### 5. Où l'algorithme est réellement allé
+
+| Critère | Molécule championne | QED | SA |
+|---|---|---:|---:|
+| Aptitude combinée | `CCCCCCCCO` — octanol | 0,547 | 1,57 |
+| QED seul | `NC=[P-]CC(=[P-])COBr` | 0,739 | 6,53 |
+
+La loi de Goodhart s'est manifestée, mais pas comme attendu. Le QED maximal
+généré (0,739) reste **en dessous** de l'ibuprofène (0,822) : l'optimiseur n'a
+pas fait exploser la métrique. Il a fait deux choses plus intéressantes :
+
+- avec les deux objectifs, il converge vers des **alcools gras simples**
+  (octanol, heptanol, octylamine). Ce sont des solvants, pas des médicaments.
+  Un poids de 0,5 sur le SA récompense tant la facilité de synthèse que
+  l'optimum devient « faites quelque chose de trivial » ;
+- avec le QED seul, il produit des **structures chimiquement absurdes**
+  (phosphore anionique, aromatiques impossibles) avec un SA supérieur à 6 :
+  valides selon la grammaire, irréalisables en laboratoire.
+
+### 6. Diversité : pas d'effondrement
+
+| Mesure | Début | Fin |
+|---|---:|---:|
+| Diversité interne | 0,984 | 0,860 |
+| Molécules inédites par génération (moyenne sur 10) | 21,2 | 20,2 |
+
+Contrairement à ce qu'on attendait, l'exploration reste quasi constante de la
+première à la dernière génération. Deux hypothèses testables : soit le taux de
+mutation de 0,15 reconstitue la variation assez vite, soit 60 générations sont
+trop peu pour que la convergence s'installe. Relancer avec 200 générations
+tranche en quelques minutes.
+
+Le nombre de squelettes de la population finale est **0** : ce n'est pas un
+bug, les championnes sont des chaînes acycliques et une molécule sans cycle
+n'a pas de squelette de Bemis–Murcko.
+
+### Défauts révélés par l'exécution, et corrigés
+
+| Défaut | Symptôme mesuré | Correction |
+|---|---|---|
+| Molécule vide acceptée comme valide | `TypeError` à la troisième génération : `MolFromSmiles("")` renvoie une molécule sans atome, pas `None` | test du nombre d'atomes dans `para_mol` et dans le calcul des notes |
+| Doublons entre graines | front annoncé à 38 entrées pour 25 molécules ; vérificateur signalant 785 « doublons » sur 6 357, soit exactement 6 357 − 5 572 | déduplication par SMILES canonique avant l'analyse |
+
+Le second est instructif : **le vérificateur avait raison**. C'est le notebook
+qui lui transmettait la même molécule trouvée par des graines différentes.
+C'est exactement le rôle d'un vérificateur indépendant que de faire remonter
+ce genre d'écart.
+
+### Protocole
+
+Budget compté en évaluations de la fonction d'aptitude et partagé par les
+trois méthodes via la classe `Orcamento`. Graines 0 à 4, fixées et
+consignées. Moyenne et écart-type sur les cinq graines. Comparaison
+systématique à deux lignes de base. Les figures et `mesures.json` sont
+régénérés ensemble, donc ils ne peuvent pas diverger.
+
+### Ce qui reste à mesurer
+
+- `pytest -q` sur une machine où RDKit fonctionne : les 79 tests n'ont pas
+  encore tous été exécutés ;
+- les benchmarks GuacaMol : non abordés.
 
 ## Limites et plan B
 
