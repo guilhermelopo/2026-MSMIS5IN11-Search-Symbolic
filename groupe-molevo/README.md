@@ -134,14 +134,23 @@ pytest -q
 
 ### État de la vérification
 
-| | Tests | Résultat |
-|---|---:|---|
-| `test_pareto.py` | 20 | **20 passent** (exécuté) |
-| les quatre autres | 59 | **pas encore exécutés** — RDKit ne se charge pas sur la machine où le squelette a été écrit |
+**La suite complète passe.** Exécutée le 23 novembre 2026 sur Google Colab,
+RDKit 2026.09.2, selfies 2.1.1 : `pytest -q` sort avec le **code 0**, aucun
+échec ni erreur.
 
-**À COMPLÉTER :** exécuter `pytest -q` sur une machine où RDKit fonctionne et
-coller la sortie ici. Certains de ces 59 tests peuvent échouer : le code a été
-écrit sans être exécuté.
+Reproduction depuis un environnement vierge :
+
+```bash
+git clone -b c3-evolucao-moleculas <url-du-fork> c3
+cd c3/groupe-molevo
+pip install -r requirements.txt
+pytest -q
+```
+
+Les huit tests couvrant la molécule vide (`test_molecula_vazia_e_rejeitada`,
+`test_cadeia_degenerada_nao_levanta` et les suivants) ont été écrits **après**
+le `TypeError` rencontré en exécution : ils verrouillent un défaut réel, pas un
+cas imaginé.
 
 ## Résultats et évaluation
 
@@ -270,9 +279,12 @@ régénérés ensemble, donc ils ne peuvent pas diverger.
 
 ### Ce qui reste à mesurer
 
-- `pytest -q` sur une machine où RDKit fonctionne : les 79 tests n'ont pas
-  encore tous été exécutés ;
-- les benchmarks GuacaMol : non abordés.
+- les benchmarks GuacaMol : non abordés ;
+- l'effet du nombre de générations sur la diversité : l'effondrement attendu
+  n'apparaît pas à 60 générations, une exécution à 200 trancherait ;
+- l'effet du poids `peso_qed` : à 0,5 l'optimum est un alcool gras, et une
+  balayage de 0 à 1 montrerait à partir de quel poids le résultat cesse
+  d'être trivial.
 
 ## Limites et plan B
 
