@@ -4,7 +4,14 @@ Soutenance : mercredi 25 novembre 2026, 13:15-17:00, salle A202 C. Evaluation
 par les pairs et par l'enseignant, sur quatre criteres notes de 0 a 10 :
 presentation, theorie, technique et organisation.
 
-Le PDF exporte depuis la presentation est depose a cote de ce fichier.
+**Le PDF est `MolEvo-soutenance-C3.pdf`**, a cote de ce fichier : seize pages,
+une par diapositive.
+
+Il sert de livrable et de plan B si le reseau manque en salle. Il ne remplace
+pas la presentation projetee : l'export fige les trois animations et les
+revelations au clic, donc les courbes de la diapositive 9, le front de la 11
+et les medicaments de la 12 y apparaissent d'un coup au lieu d'etre devoiles
+un par un.
 
 ## Registre visuel
 
