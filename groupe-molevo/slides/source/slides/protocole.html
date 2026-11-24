@@ -1,0 +1,34 @@
+<section id="protocole" class="paper2 sheet" data-transition="fade" style="gap:0">
+<svg class="a-bloom" aria-label="Forme organique décorative" width="800" height="760" viewBox="0 0 800 760" style="position:absolute; left:1100px; top:140px; width:820px; height:780px"><path d="M150 58 C322 -14 568 22 690 150 C812 278 796 480 672 596 C548 712 326 732 192 652 C58 572 -2 386 36 240 C66 134 86 84 150 58 Z" fill="#BE4228" opacity="0.05"/></svg>
+<h2 class="a-rise d1" style="margin-bottom:28px">Ce qu’il faut fixer pour pouvoir conclure</h2>
+
+<div class="band a-left d2" style="gap:44px; align-items:baseline; padding-top:22px; padding-bottom:22px">
+  <p class="lab" style="width:300px">Budget</p>
+  <p class="fig-m" style="width:280px">3 600</p>
+  <p style="flex:1">par méthode et par graine, comptées en appels à la fonction d’objectif, pas en générations : sinon le hill climbing n’en recevrait que 60.</p>
+</div>
+
+<div class="band a-left d4" style="gap:44px; align-items:baseline; padding-top:22px; padding-bottom:22px">
+  <p class="lab" style="width:300px">Graines</p>
+  <p class="fig-m" style="width:280px">5</p>
+  <p style="flex:1">exécutions indépendantes. Chaque chiffre de cette présentation est une moyenne, donnée avec son écart-type.</p>
+</div>
+
+<div class="band a-left d6" style="gap:44px; align-items:baseline; padding-top:22px; padding-bottom:22px">
+  <p class="lab" style="width:300px">Lignes de base</p>
+  <p class="fig-m" style="width:280px">2</p>
+  <p style="flex:1">la recherche aléatoire donne le plancher ; le hill climbing est le concurrent sérieux, car en SELFIES toute mutation est valide.</p>
+</div>
+
+<div class="band a-left d8" style="gap:44px; align-items:baseline; padding-top:22px; padding-bottom:22px; border-bottom:1px solid #B9B1A0">
+  <p class="lab" style="width:300px">Vérification</p>
+  <p class="fig-m pet" style="width:280px">0 problème</p>
+  <p style="flex:1">sur 5 572 notes recalculées par un chemin de code séparé, et 79 tests au vert. Une note falsifiée exprès : détectée.</p>
+</div>
+
+<div class="mark a-fade d1"><img src="/_blob/3625dc222225be82df21815e93d764fe" alt="EPF Engineering School" style="width:69px; height:56px"></div>
+<p class="rail-top a-fade d1"><span>07 / 15</span><span class="grow"></span><span>Le protocole</span></p>
+<p class="rail-bot a-fade d9"><span class="m" style="letter-spacing:0; text-transform:none">python -m src.run --graines 5 --pop 60 --generations 60</span><span class="grow"></span><span>Python 3.13.18 · RDKit 2026.09.2 · selfies 2.1.1 · 79 tests</span></p>
+
+<aside>Lucas. C'est la diapositive dont je suis le plus content, parce que c'est elle qui rend les suivantes lisibles. Quatre décisions. Un : le budget se compte en évaluations, pas en générations. Si on comparait à nombre de générations égal, le GA aurait 3 600 évaluations et le hill climbing 60 ; la comparaison serait truquée en notre faveur. Deux : cinq graines, et tout chiffre vient avec son écart-type. Trois : deux lignes de base. La recherche aléatoire est le plancher : si on ne la bat pas, on n'évolue rien du tout. Le hill climbing est le concurrent honnête, parce qu'en SELFIES toute mutation étant valide, une simple montée de colline est déjà une bonne méthode. Quatre : un vérificateur indépendant, qui relit le registre et recalcule chaque note par un chemin de code séparé, sans réutiliser le cache ni les fonctions de la recherche. Et nous lui avons donné une note falsifiée exprès : il l'a détectée. Donc quand il annonce zéro problème sur 5 572 molécules, ce n'est pas qu'il regarde ailleurs.</aside>
+</section>

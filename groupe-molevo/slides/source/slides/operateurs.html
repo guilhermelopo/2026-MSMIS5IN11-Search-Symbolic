@@ -1,0 +1,43 @@
+<section id="operateurs" class="paper sheet" data-transition="fade" style="gap:24px">
+<svg class="a-bloom" aria-label="Forme organique décorative" width="800" height="760" viewBox="0 0 800 760" style="position:absolute; left:1140px; top:200px; width:780px; height:742px"><path d="M150 58 C322 -14 568 22 690 150 C812 278 796 480 672 596 C548 712 326 732 192 652 C58 572 -2 386 36 240 C66 134 86 84 150 58 Z" fill="#1D5260" opacity="0.05"/></svg>
+<h2 class="a-rise d1">L’opérateur de mutation, en entier</h2>
+
+<div style="display:flex; gap:44px; align-items:flex-start">
+
+  <div class="code a-rise d3" style="width:1080px">
+    <p>def muter(chaine: str, rng: random.Random, p: float = 0.15) -&gt; str:</p>
+    <p>&#160;&#160;&#160;&#160;alpha = alphabet()</p>
+    <p>&#160;&#160;&#160;&#160;sortie: list[str] = []</p>
+    <p>&#160;&#160;&#160;&#160;for jeton in jetons(chaine):</p>
+    <p>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;r = rng.random()</p>
+    <div style="display:flex"><p style="width:640px">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;if r &lt; p / 3:</p><p class="cm"># substituer</p></div>
+    <p>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;sortie.append(rng.choice(alpha))</p>
+    <div style="display:flex"><p style="width:640px">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;elif r &lt; 2 * p / 3:</p><p class="cm"># inserer</p></div>
+    <p>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;sortie.append(rng.choice(alpha))</p>
+    <p>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;sortie.append(jeton)</p>
+    <div style="display:flex"><p style="width:640px">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;elif r &lt; p:</p><p class="cm"># supprimer</p></div>
+    <p>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;continue</p>
+    <p>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;else:</p>
+    <p>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;sortie.append(jeton)</p>
+    <p>&#160;&#160;&#160;&#160;return "".join(sortie) or rng.choice(alpha)</p>
+  </div>
+
+  <div class="col" style="width:540px; gap:24px">
+    <p class="kicker a-rise d5" style="font-size:30px">« La validité des enfants n’est vérifiée nulle part. Elle est garantie par la représentation. »</p>
+    <div class="col a-rise d7" style="gap:6px">
+      <p class="lab">Ce qui n’y est pas</p>
+      <p style="font-size:26px">Aucun try/except, aucune vérification de validité, aucune boucle « réessaie ».</p>
+    </div>
+    <div class="col a-rise d8" style="gap:6px">
+      <p class="lab">Insérer et supprimer</p>
+      <p style="font-size:26px">Sans elles la taille de la molécule reste figée, or elle pèse lourd dans le QED.</p>
+    </div>
+  </div>
+</div>
+
+<div class="mark a-fade d1"><img src="/_blob/3625dc222225be82df21815e93d764fe" alt="EPF Engineering School" style="width:69px; height:56px"></div>
+<p class="rail-top a-fade d1"><span>06 / 15</span><span class="grow"></span><span>L’implémentation</span></p>
+<p class="rail-bot a-fade d9"><span>Docstring repliée dans la marge, rien d’autre n’est coupé</span><span class="grow"></span><span class="m" style="letter-spacing:0; text-transform:none">src/operators.py</span></p>
+
+<aside>Lucas. Guilherme vous a dit que SELFIES rend la mutation sûre. Voici ce que ça donne dans le code, et je montre la fonction en entier : seule la docstring est repliée dans la marge à droite, rien d'autre n'est coupé. Lisez-la pour ce qui n'y est pas. Il n'y a pas de try/except. Il n'y a pas de vérification de validité après coup. Il n'y a pas de boucle « tant que l'enfant est invalide, réessaie ». En SMILES, cette fonction ferait trois fois cette taille, et l'essentiel serait de la plomberie de rattrapage. Ici, on tire un nombre par jeton et on applique une des trois opérations. Deux points que j'aimerais souligner parce qu'ils sont des décisions, pas des accidents. D'abord, l'insertion et la suppression : sans elles, la taille de la molécule reste figée à la taille initiale, or la taille est un des descripteurs qui pèsent le plus dans le QED. On se priverait d'une dimension entière de l'espace de recherche. Ensuite, le rng passé en argument : jamais le module random global. Sans ça, deux exécutions avec la même graine donneraient des résultats différents dès qu'une autre partie du programme tirerait un nombre au milieu, et toute notre reproductibilité tomberait. Dernière ligne enfin : quand p est élevé, tout supprimer est possible, et renvoyer la chaîne vide casserait le décodeur. On retombe sur un jeton unique. C'est le genre de cas limite qu'on ne voit qu'en exécutant.</aside>
+</section>

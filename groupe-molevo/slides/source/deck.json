@@ -1,0 +1,54 @@
+{
+  "v": 5,
+  "createdOnFiles": { "v": 1, "at": "2026-11-24T09:00:00Z" },
+  "lists": "css",
+  "format": { "v": 1, "shared": ["project/deck.css"] },
+  "title": "MolEvo — Soutenance C3",
+  "cover": "cover",
+  "order": [
+    "cover",
+    "probleme",
+    "representation",
+    "objectifs",
+    "algorithme",
+    "operateurs",
+    "protocole",
+    "resultat",
+    "diversite",
+    "pareto",
+    "medicaments",
+    "limites",
+    "bugs",
+    "organisation",
+    "demonstration"
+  ],
+  "sections": {
+    "ouverture": {
+      "description": "Le problème posé et la représentation qui le rend traitable.",
+      "start": "cover"
+    },
+    "methode": {
+      "description": "Les deux objectifs, la boucle évolutionnaire et le protocole de mesure.",
+      "start": "objectifs"
+    },
+    "resultats": {
+      "description": "Ce que la recherche produit à budget égal, et ce que montre le front de Pareto.",
+      "start": "resultat"
+    },
+    "critique": {
+      "description": "L'épreuve des médicaments réels, la loi de Goodhart et les leçons de code.",
+      "start": "medicaments"
+    }
+  },
+  "faces": {
+    "newsreader": {
+      "family": "Newsreader",
+      "href": "https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&display=swap"
+    },
+    "ibm-plex-mono": {
+      "family": "IBM Plex Mono",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    }
+  },
+  "designSystems": []
+}

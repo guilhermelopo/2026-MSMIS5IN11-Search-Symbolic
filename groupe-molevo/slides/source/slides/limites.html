@@ -1,0 +1,46 @@
+<section id="limites" class="ink sheet" data-transition="fade" style="gap:30px">
+<svg class="a-bloom" aria-label="Forme organique décorative" width="800" height="760" viewBox="0 0 800 760" style="position:absolute; left:0px; top:262px; width:860px; height:818px"><path d="M150 58 C322 -14 568 22 690 150 C812 278 796 480 672 596 C548 712 326 732 192 652 C58 572 -2 386 36 240 C66 134 86 84 150 58 Z" fill="#BE4228" opacity="0.16"/></svg>
+<h2 class="a-rise d1">Ce que l’optimiseur a vraiment trouvé</h2>
+
+<div style="display:flex; gap:56px; align-items:flex-start">
+
+  <div class="col a-rise d3" style="width:776px; gap:20px">
+    <p class="lab">Avec les deux objectifs</p>
+    <p class="m" style="font-size:40px; font-weight:600; color:#F7F3E9">CCCCCCCCO</p>
+    <div class="plot" style="height:96px">
+      <svg aria-label="Structure de l'octanol : huit carbones en zigzag terminés par un groupe hydroxyle." width="660" height="96" viewBox="0 0 660 96" style="position:absolute; left:0px; top:0px; width:660px; height:96px">
+        <polyline fill="none" stroke="#E5724F" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="700" stroke-dashoffset="0" points="24,70 100,32 176,70 252,32 328,70 404,32 480,70 556,32 632,70"><animate attributeName="stroke-dashoffset" from="700" to="0" dur="1.2s" begin="0.5s"/></polyline>
+        <g fill="#14181A" stroke="#E5724F" stroke-width="4" opacity="1"><animate attributeName="opacity" from="0" to="1" dur="0.5s" begin="1.5s"/>
+          <circle cx="24" cy="70" r="8"/><circle cx="100" cy="32" r="8"/><circle cx="176" cy="70" r="8"/><circle cx="252" cy="32" r="8"/><circle cx="328" cy="70" r="8"/><circle cx="404" cy="32" r="8"/><circle cx="480" cy="70" r="8"/><circle cx="556" cy="32" r="8"/>
+        </g>
+        <circle cx="632" cy="70" r="13" fill="#E5724F" opacity="1"><animate attributeName="opacity" from="0" to="1" dur="0.5s" begin="1.7s"/></circle>
+      </svg>
+      <p class="pin ver a-fade d8" style="left:654px; top:52px; font-size:28px">OH</p>
+    </div>
+    <p class="m" style="font-size:26px; color:#8A9490">QED 0,547 · SA 1,57 · aptitude 0,7417</p>
+    <p style="font-size:28px">Un alcool gras. C’est un <i>solvant</i>, pas un médicament : avec un poids de 0,5 sur la synthèse, l’optimum devient « faire quelque chose de trivial ».</p>
+  </div>
+
+  <div class="col a-rise d5" style="flex:1; gap:20px; border-left:1px solid #333D40; padding-left:56px">
+    <p class="lab">Avec le QED seul</p>
+    <p class="m" style="font-size:40px; font-weight:600; color:#F7F3E9">NC=<span class="ver">[P-]</span>CC(=<span class="ver">[P-]</span>)COBr</p>
+    <div style="height:96px; display:flex; align-items:center">
+      <p class="m" style="font-size:26px; color:#8A9490">deux phosphores anioniques · un brome terminal</p>
+    </div>
+    <p class="m" style="font-size:26px; color:#8A9490">QED 0,739 · SA 6,53 · aptitude 0,5624</p>
+    <p style="font-size:28px">Valide selon la grammaire, décodable sans erreur, et sans aucun sens au laboratoire. Retirer la contrainte ne libère pas la créativité : elle ouvre les angles morts de la métrique.</p>
+  </div>
+</div>
+
+<div class="band a-rise d7" style="align-items:baseline; padding-top:24px">
+  <p style="font-size:32px; color:#F2EDE1; width:1300px">Notre QED maximal est <span class="gld">0,739</span>, sous l’ibuprofène à <span class="gld">0,822</span>. La métrique n’a pas explosé : l’optimiseur a trouvé la zone où elle est peu exigeante.</p>
+  <span class="grow"></span>
+  <p class="lab">loi de Goodhart</p>
+</div>
+
+<div class="mark a-fade d1"><img src="/_blob/3625dc222225be82df21815e93d764fe" alt="EPF Engineering School" style="width:69px; height:56px"></div>
+<p class="rail-top a-fade d1"><span>12 / 15</span><span class="grow"></span><span>Les limites</span></p>
+<p class="rail-bot a-fade d8"><span>Ce que nous ne prétendons pas</span><span class="grow"></span><span>aucune cible biologique, aucune réaction, aucune toxicité simulée</span></p>
+
+<aside>Guilherme. C'est la diapositive la plus importante de la soutenance, et nous la montrons volontairement. À gauche : optimisé sur les deux objectifs, l'algorithme converge vers CCCCCCCCO, l'octanol. Huit carbones en ligne droite et un hydroxyle. C'est un solvant de laboratoire. Et c'est parfaitement logique : avec un poids de 0,5 sur la facilité de synthèse, le meilleur compromis mathématique c'est « faites quelque chose de trivial et pas trop mal noté ». À droite, l'expérience inverse : tout le poids sur le QED. On obtient une molécule à deux phosphores anioniques et un brome, SA de 6,53, soit le double de l'atorvastatine. Valide selon la grammaire, décodable, et totalement irréalisable. La leçon est symétrique : la contrainte de synthèse ne bride pas la créativité, elle empêche l'optimiseur d'exploiter les angles morts de la métrique. Et le point final, le plus intéressant : notre QED maximal est 0,739, sous l'ibuprofène à 0,822. La métrique n'a pas explosé. L'optimiseur n'a pas trouvé une faille spectaculaire, il a trouvé la région où le QED est peu exigeant. C'est la loi de Goodhart dans sa version silencieuse : la mesure cesse d'être un bon proxy bien avant de devenir absurde.</aside>
+</section>

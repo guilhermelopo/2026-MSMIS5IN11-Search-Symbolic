@@ -1,0 +1,58 @@
+<section id="representation" class="paper sheet" data-transition="fade" style="gap:32px">
+<svg class="a-bloom" aria-label="Forme organique décorative" width="800" height="760" viewBox="0 0 800 760" style="position:absolute; left:0px; top:414px; width:700px; height:666px"><path d="M150 58 C322 -14 568 22 690 150 C812 278 796 480 672 596 C548 712 326 732 192 652 C58 572 -2 386 36 240 C66 134 86 84 150 58 Z" fill="#BE4228" opacity="0.055"/></svg>
+<h2 class="a-rise d1">Une grammaire qui ne casse pas</h2>
+<p class="kicker a-rise d3">La même substitution d’une unité, appliquée aux deux écritures de la même molécule.</p>
+<div style="height:430px"></div>
+
+<x-embed style="position:absolute; left:128px; top:423px; width:1664px; height:430px">
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;height:100%;background:transparent;overflow:hidden;
+font-family:ui-monospace,'Cascadia Mono',Menlo,Consolas,'Courier New',monospace;
+font-size:24px;line-height:1.5;color:#14181A;-webkit-font-smoothing:antialiased}
+.hd{display:flex;align-items:baseline;letter-spacing:2px;text-transform:uppercase;color:#6A6559;font-size:24px}
+.hd b{font-weight:600;color:#14181A;letter-spacing:2px}
+.g{flex:1}
+.r{border-top:1px solid #C9C1B0;margin:10px 0 14px}
+.ln{white-space:pre;font-size:24px}
+.dim{color:#8B8575}
+.v{color:#BE4228;font-weight:600}
+.p{color:#1D5260;font-weight:600}
+.sq{display:inline-block;width:14px;height:14px;margin-right:12px;vertical-align:middle}
+.hit{background:#BE4228;color:#EDE7DA;padding:0 2px}
+.hit2{background:#1D5260;color:#EDE7DA;padding:0 2px}
+.blk{margin-bottom:34px}
+.fl{transition:opacity .25s}
+</style></head><body>
+<div class="blk">
+  <div class="hd"><b>SMILES</b><span class="g"></span><span>aspirine · exemple mesuré</span></div>
+  <div class="r"></div>
+  <div class="ln dim">CC(=O)Oc1ccccc1C(=O)O</div>
+  <div class="ln">CC(=O)Oc1cccc<span class="hit">-</span>1C(=O)O<span style="display:inline-block;width:150px"></span><span class="sq" style="background:#BE4228"></span><span class="v">REJETÉE — le cycle n’est plus fermé</span></div>
+</div>
+<div class="blk">
+  <div class="hd"><b>SELFIES</b><span class="g"></span><span id="no">mutation n° 1</span></div>
+  <div class="r"></div>
+  <div class="ln" id="sel"></div>
+  <div class="ln"><span class="dim">se décode en </span><span id="out"></span><span class="sq" style="background:#1D5260;margin-left:40px"></span><span class="p">VALIDE</span></div>
+</div>
+<script>
+var T=["[C]","[C]","[=Branch1]","[C]","[=O]","[O]","[C]","[=C]","[C]","[=C]","[C]","[=C]","[Ring1]","[=Branch1]","[C]","[=Branch1]","[C]","[=O]","[O]"];
+var M=[[10,"[=B]","CC(=O)OC1=CC=C=BC1C(=O)O"],[12,"[#C-1]","CC(=O)OC=CC=CC=C=[C-1]C(=O)O"],[18,"[#C]","CC(=O)OC1=CC=CC=C1C(=O)C"],[1,"[#P+1]","C#[P+1](=O)OC1=CC=CC=C1C(=O)O"],[13,"[I]","CC(=O)OC=CC=CC#CC(=O)O"]];
+var k=0,sel=document.getElementById('sel'),out=document.getElementById('out'),no=document.getElementById('no');
+function step(){var m=M[k%M.length];k++;
+ sel.innerHTML=T.slice(0,m[0]).join('')+'<span class="hit2">'+m[1]+'</span>'+T.slice(m[0]+1).join('');
+ out.textContent=m[2];
+ no.textContent='mutation n° '+((k-1)%M.length+1);
+ sel.style.opacity=0.25;out.style.opacity=0.25;
+ setTimeout(function(){sel.style.opacity=1;out.style.opacity=1;},160);}
+sel.className='ln fl';out.className='fl';
+step();setInterval(step,2800);
+</script></body></html>
+</x-embed>
+
+<div class="mark a-fade d1"><img src="/_blob/3625dc222225be82df21815e93d764fe" alt="EPF Engineering School" style="width:69px; height:56px"></div>
+<p class="rail-top a-fade d1"><span>03 / 15</span><span class="grow"></span><span>La représentation</span></p>
+<p class="rail-bot a-fade d5"><span class="ver">SMILES 13,7 %</span><span class="pet">SELFIES 100,0 %</span><span class="grow"></span><span>n = 2 000 substitutions</span><span>Krenn et al., 2020</span></p>
+
+<aside>Guilherme. Voici la décision la plus importante du projet, et la seule que nous avons mesurée avant d'écrire l'algorithme. En SMILES, une molécule est une chaîne avec une syntaxe : parenthèses appariées, indices de cycle ouverts puis refermés, valences respectées. Changez un caractère au hasard et vous cassez presque toujours cette syntaxe. En haut, l'exemple mesuré : le 1 qui ferme le cycle devient un tiret, et RDKit refuse. En bas, la même molécule en SELFIES, et là je vous laisse regarder : chaque mutation que vous voyez défiler est réelle, un seul symbole remplacé au hasard, et à chaque fois la chaîne se décode en une molécule différente mais valide. C'est garanti par construction : les symboles de branche et de cycle portent leur propre longueur, et un dérivé impossible est corrigé pendant le décodage. Le chiffre : 13,7 % contre 100 % sur 2 000 substitutions. Concrètement, mutation et croisement n'ont besoin d'aucun rejet, d'aucune réparation, d'aucune boucle « réessaie ». La contrepartie, pour être complet : une chaîne SELFIES peut être dégénérée, c'est-à-dire se décoder vers une molécule vide, et c'est exactement le premier bug que nous montrons à la fin.</aside>
+</section>

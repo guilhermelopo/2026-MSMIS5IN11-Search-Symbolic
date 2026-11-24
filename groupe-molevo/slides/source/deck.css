@@ -1,0 +1,217 @@
+/* ==========================================================
+   MolEvo — soutenance C3
+   Registre : cahier de laboratoire. Papier vieilli, filets
+   d'un pixel, releves en monospace, chiffres en serif.
+   Petrole = ce qui tient.  Vermillon = ce qui casse.
+   ========================================================== */
+
+section { counter-increment: page; }
+
+body {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.42;
+  color: #3C3A33;
+}
+
+h1, h2, h3 { font-family: 'Newsreader', Georgia, serif; font-weight: 400; }
+
+/* ---------- surfaces ---------- */
+.paper { background: #EDE7DA; }
+.paper2 { background: #E4DCCB; }
+.ink { background: #14181A; }
+
+/* ---------- la feuille ---------- */
+.sheet {
+  padding: 212px 128px 196px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* ---------- couche organique : taches d'encre sur le papier ----------
+   Toujours le PREMIER enfant de la section, pour passer derriere. */
+@keyframes bloom { from { opacity: 0; transform: translateY(0px) scale(0.90); } }
+.a-bloom { animation: bloom 1.8s cubic-bezier(.16,.84,.26,1) both; }
+
+/* ---------- la marque de l'ecole, en tete de chaque feuille ----------
+   Sur fond encre, le violet du logo tombe a 1,5:1 : il lui faut
+   une plaque claire. Le logo garde ses couleurs dans les deux cas. */
+.mark { position: absolute; left: 128px; top: 56px; display: flex; }
+.ink .mark {
+  background: #F5F1E8;
+  padding: 10px 16px;
+  border-radius: 8px;
+  left: 112px;
+  top: 46px;
+}
+
+/* ---------- les deux rails ---------- */
+.rail-top, .rail-bot {
+  position: absolute;
+  left: 128px;
+  width: 1664px;
+  display: flex;
+  align-items: baseline;
+  gap: 28px;
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #6A6559;
+}
+.rail-top { top: 136px; padding-bottom: 18px; border-bottom: 1px solid #C9C1B0; }
+.rail-bot { bottom: 96px; padding-top: 18px; border-top: 1px solid #C9C1B0; }
+.ink .rail-top { border-bottom: 1px solid #333D40; color: #8A9490; }
+.ink .rail-bot { border-top: 1px solid #333D40; color: #8A9490; }
+.grow { flex: 1; }
+
+/* ---------- titres ---------- */
+.sheet h2 {
+  font-size: 92px;
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -1px;
+  color: #14181A;
+}
+.ink h2 { color: #F2EDE1; }
+.sheet h3 {
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #14181A;
+}
+.ink h3 { color: #EDE7DA; }
+
+.kicker {
+  font-family: 'Newsreader', Georgia, serif;
+  font-style: italic;
+  font-size: 38px;
+  line-height: 1.35;
+  color: #5B5750;
+}
+.ink .kicker { color: #B6BDB8; }
+
+p { color: #3C3A33; }
+.ink p { color: #C4C9C4; }
+
+/* ---------- monospace, l'instrument ---------- */
+.m {
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  font-size: 26px;
+  letter-spacing: -0.3px;
+}
+.lab {
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #6A6559;
+}
+.ink .lab { color: #8A9490; }
+
+/* ---------- chiffres ---------- */
+.fig {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 132px;
+  font-weight: 300;
+  line-height: 0.92;
+  letter-spacing: -3px;
+  color: #14181A;
+}
+.ink .fig { color: #F2EDE1; }
+.fig-m {
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  font-size: 40px;
+  font-weight: 500;
+  color: #14181A;
+}
+.ink .fig-m { color: #F2EDE1; }
+
+/* ---------- couleurs porteuses de sens ---------- */
+.pet { color: #1D5260; }
+.ver { color: #BE4228; }
+.gld { color: #9A7114; }
+.ink .pet { color: #6FB3B8; }
+.ink .ver { color: #E5724F; }
+.ink .gld { color: #E3B23C; }
+.mut { color: #6A6559; }
+.ink .mut { color: #8A9490; }
+
+/* ---------- filets : la seule separation du jeu ---------- */
+.rule { border-top: 1px solid #C9C1B0; }
+.ink .rule { border-top: 1px solid #333D40; }
+.band { display: flex; gap: 48px; border-top: 1px solid #C9C1B0; padding-top: 24px; }
+.ink .band { border-top: 1px solid #333D40; }
+.col { display: flex; flex-direction: column; gap: 10px; }
+
+/* ---------- graphiques ---------- */
+.plot { position: relative; }
+.tick {
+  position: absolute;
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  font-size: 24px;
+  color: #8B8575;
+}
+.ink .tick { color: #78817D; }
+.pin {
+  position: absolute;
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* ---------- bloc de code ---------- */
+.code {
+  background: #14181A;
+  padding: 24px 26px;
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  font-size: 26px;
+  line-height: 1.38;
+}
+.code p { color: #C4C9C4; }
+.code .cm { color: #6FB3B8; }
+
+/* ---------- tableau ---------- */
+table {
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  font-size: 26px;
+  color: #3C3A33;
+}
+.ink table { color: #C4C9C4; }
+
+/* ==========================================================
+   MOUVEMENT
+   ========================================================== */
+@keyframes rise  { from { opacity: 0; transform: translateY(26px); } }
+@keyframes fade  { from { opacity: 0; } }
+@keyframes wipe  { from { opacity: 0; transform: translateY(0px) scale(0.94); } }
+@keyframes slide-in { from { opacity: 0; transform: translateX(-40px); } }
+
+.a-rise { animation: rise .72s cubic-bezier(.16,.84,.26,1) both; }
+.a-fade { animation: fade .9s ease-out both; }
+.a-wipe { animation: wipe .8s cubic-bezier(.16,.84,.26,1) both; }
+.a-left { animation: slide-in .7s cubic-bezier(.16,.84,.26,1) both; }
+
+.d1 { animation-delay: .06s; }
+.d2 { animation-delay: .16s; }
+.d3 { animation-delay: .26s; }
+.d4 { animation-delay: .36s; }
+.d5 { animation-delay: .48s; }
+.d6 { animation-delay: .60s; }
+.d7 { animation-delay: .72s; }
+.d8 { animation-delay: .86s; }
+.d9 { animation-delay: 1s; }
+
+/* ---------- etapes au clic ---------- */
+.fragment { opacity: 0; transition: opacity .5s ease; }
+.fragment.visible { opacity: 1; }
+.fragment.up { opacity: 0; transform: translateY(24px); transition: opacity .5s ease, transform .5s cubic-bezier(.16,.84,.26,1); }
+.fragment.up.visible { opacity: 1; transform: translateY(0px); }
+.fragment.pop { opacity: 0; transform: translateY(0px) scale(0.9); transition: opacity .45s ease, transform .45s cubic-bezier(.16,.84,.26,1); }
+.fragment.pop.visible { opacity: 1; transform: translateY(0px) scale(1); }

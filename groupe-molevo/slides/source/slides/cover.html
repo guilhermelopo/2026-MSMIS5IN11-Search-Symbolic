@@ -1,0 +1,43 @@
+<section id="cover" class="ink" data-transition="fade" style="padding:212px 128px 196px; display:flex; flex-direction:column; justify-content:center; gap:0">
+
+<svg class="a-bloom" aria-label="Forme organique décorative" width="800" height="760" viewBox="0 0 800 760" style="position:absolute; left:1020px; top:120px; width:900px; height:856px"><path d="M430 18 C602 18 764 150 778 340 C792 530 660 690 460 720 C260 750 68 636 28 448 C-12 260 78 92 248 36 C302 18 372 18 430 18 Z" fill="#1D5260" opacity="0.22"/></svg>
+<svg class="a-bloom" aria-label="Forme organique décorative" width="800" height="760" viewBox="0 0 800 760" style="position:absolute; left:0px; top:560px; width:620px; height:589px"><path d="M336 16 C520 6 702 96 756 254 C810 412 740 592 572 674 C404 756 204 728 102 604 C0 480 14 272 108 158 C180 72 248 22 336 16 Z" fill="#BE4228" opacity="0.12"/></svg>
+
+<x-embed style="position:absolute; left:0px; top:0px; width:1920px; height:1080px">
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;height:100%;background:transparent;overflow:hidden}canvas{display:block}</style></head><body><canvas id="c" width="1920" height="1080"></canvas><script>
+var c=document.getElementById('c'),x=c.getContext('2d'),W=1920,H=1080;
+function mk(){var n=3+((Math.random()*4)|0),p=[],a=Math.random()*6.28,px=0,py=0,i;
+for(i=0;i<n;i++){p.push([px,py]);a+=(Math.random()-0.5)*1.7;px+=Math.cos(a)*22;py+=Math.sin(a)*22;}
+return{p:p,x:60+Math.random()*(W-120),y:60+Math.random()*(H-120),vx:(Math.random()-0.5)*0.24,vy:(Math.random()-0.5)*0.24,r:Math.random()*6.28,vr:(Math.random()-0.5)*0.0035,f:0};}
+var M=[],i;for(i=0;i<34;i++)M.push(mk());
+function draw(){x.clearRect(0,0,W,H);
+for(var k=0;k<M.length;k++){var m=M[k];m.x+=m.vx;m.y+=m.vy;m.r+=m.vr;
+if(m.x<40||m.x>W-40)m.vx*=-1;if(m.y<40||m.y>H-40)m.vy*=-1;if(m.f>0)m.f-=0.010;
+var col=m.f>0?'rgba(229,114,79,'+(0.30+m.f*0.70)+')':'rgba(111,179,184,0.30)';
+x.strokeStyle=col;x.fillStyle=col;x.lineWidth=m.f>0?2.6:1.5;
+var cs=Math.cos(m.r),sn=Math.sin(m.r),j,q,qx,qy;
+x.beginPath();
+for(j=0;j<m.p.length;j++){q=m.p[j];qx=m.x+q[0]*cs-q[1]*sn;qy=m.y+q[0]*sn+q[1]*cs;if(j===0)x.moveTo(qx,qy);else x.lineTo(qx,qy);}
+x.stroke();
+for(j=0;j<m.p.length;j++){q=m.p[j];qx=m.x+q[0]*cs-q[1]*sn;qy=m.y+q[0]*sn+q[1]*cs;
+x.beginPath();x.arc(qx,qy,m.f>0?5.5:3.4,0,6.283);x.fill();}}
+if(Math.random()<0.020){var mm=M[(Math.random()*M.length)|0];mm.f=1;
+var ii=1+((Math.random()*(mm.p.length-1))|0);mm.p[ii]=[mm.p[ii][0]+(Math.random()-0.5)*26,mm.p[ii][1]+(Math.random()-0.5)*26];}
+requestAnimationFrame(draw);}
+draw();
+</script></body></html>
+</x-embed>
+
+<h1 class="a-rise d2" style="font-family:'Newsreader',Georgia,serif; font-size:112px; font-weight:400; line-height:1.03; letter-spacing:-2px; color:#F7F3E9; width:1180px">Conception évolutionnaire de molécules candidates</h1>
+<p class="kicker a-rise d4" style="width:960px; margin-top:34px">Proposer des molécules qui ressemblent à un médicament oral et qu’un chimiste saurait fabriquer. Un algorithme génétique sur SELFIES, mesuré à budget égal contre deux lignes de base, puis confronté à six médicaments réels.</p>
+<div class="a-fade d6" style="width:420px; margin-top:44px; border-top:1px solid #333D40; padding-top:22px">
+  <p class="m" style="font-size:28px; color:#EDE7DA">Guilherme Lôpo Andrade</p>
+  <p class="m" style="font-size:28px; color:#EDE7DA">Lucas Paiva Lapenda de Moura</p>
+</div>
+
+<div class="mark a-fade d1"><img src="/_blob/3625dc222225be82df21815e93d764fe" alt="EPF Engineering School" style="width:69px; height:56px"></div>
+<p class="rail-top a-fade d1"><span>Majeure ingénierie et santé</span><span class="grow"></span><span>MSMIS5IN11 — IA exploratoire et symbolique</span></p>
+<p class="rail-bot a-fade d8"><span>Projet C3</span><span class="grow"></span></p>
+
+<aside>Guilherme ouvre. Bonjour, nous sommes Guilherme et Lucas, et notre projet C3 est un algorithme génétique qui fait évoluer des molécules. Ce que vous voyez derrière, ce sont des graphes moléculaires qui dérivent, et de temps en temps l'un d'eux mute : c'est littéralement ce que fait notre boucle, en plus lent. Le plan : le problème et la représentation, que je présente ; l'algorithme, le protocole et les résultats, que Lucas présente ; et nous terminons tous les deux sur les limites, qui sont la partie la plus intéressante du travail. Tout est mesuré : cinq graines, budget identique entre les méthodes, et un vérificateur indépendant qui recalcule chaque note.</aside>
+</section>

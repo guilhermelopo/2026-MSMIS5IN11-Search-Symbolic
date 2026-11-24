@@ -1,0 +1,63 @@
+<section id="objectifs" class="paper2 sheet" data-transition="fade" style="gap:26px">
+<svg class="a-bloom" aria-label="Forme organique décorative" width="800" height="760" viewBox="0 0 800 760" style="position:absolute; left:1140px; top:60px; width:780px; height:742px"><path d="M430 18 C602 18 764 150 778 340 C792 530 660 690 460 720 C260 750 68 636 28 448 C-12 260 78 92 248 36 C302 18 372 18 430 18 Z" fill="#1D5260" opacity="0.05"/></svg>
+<h2 class="a-rise d1">Deux notes qui se contredisent</h2>
+
+<div class="a-rise d3">
+  <div style="display:flex; align-items:baseline; gap:24px">
+    <h3 style="width:90px">QED</h3>
+    <p style="font-size:30px">ressemblance de profil avec un médicament oral</p>
+    <span class="grow"></span>
+    <p class="lab">plus haut est meilleur</p>
+  </div>
+  <div class="plot" style="height:160px; margin-top:14px">
+    <p class="pin pet a-fade d7" style="left:1030px; top:0px; width:360px; text-align:center">0,739 · notre maximum</p>
+    <div class="a-fade d7" style="position:absolute; left:1209px; top:38px; width:3px; height:18px; background:#1D5260"></div>
+    <div style="position:absolute; left:0px; top:56px; width:1664px; border-top:1px solid #B9B1A0"></div>
+    <p class="tick" style="left:0px; top:16px">0</p>
+    <p class="tick" style="right:0px; top:16px">1</p>
+    <div style="position:absolute; left:270px; top:56px; width:2px; height:24px; background:#14181A"></div>
+    <p class="m" style="position:absolute; left:191px; top:86px; width:160px; text-align:center">0,163</p>
+    <p style="position:absolute; left:181px; top:120px; width:180px; text-align:center; font-size:26px">atorvastatine</p>
+    <div style="position:absolute; left:990px; top:56px; width:2px; height:24px; background:#14181A"></div>
+    <p class="m" style="position:absolute; left:911px; top:86px; width:160px; text-align:center">0,595</p>
+    <p style="position:absolute; left:901px; top:120px; width:180px; text-align:center; font-size:26px">paracétamol</p>
+    <div style="position:absolute; left:1368px; top:56px; width:2px; height:24px; background:#14181A"></div>
+    <p class="m" style="position:absolute; left:1289px; top:86px; width:160px; text-align:center">0,822</p>
+    <p style="position:absolute; left:1279px; top:120px; width:180px; text-align:center; font-size:26px">ibuprofène</p>
+  </div>
+</div>
+
+<div class="a-rise d5">
+  <div style="display:flex; align-items:baseline; gap:24px">
+    <h3 style="width:90px">SA</h3>
+    <p style="font-size:30px">difficulté de synthèse estimée sur la fréquence des fragments</p>
+    <span class="grow"></span>
+    <p class="lab">plus bas est meilleur</p>
+  </div>
+  <div class="plot" style="height:160px; margin-top:14px">
+    <p class="pin ver a-fade d8" style="left:841px; top:0px; width:360px; text-align:center">6,53 · le QED laissé seul</p>
+    <div class="a-fade d8" style="position:absolute; left:1020px; top:38px; width:3px; height:18px; background:#BE4228"></div>
+    <div style="position:absolute; left:0px; top:56px; width:1664px; border-top:1px solid #B9B1A0"></div>
+    <p class="tick" style="left:0px; top:16px">1</p>
+    <p class="tick" style="right:0px; top:16px">10</p>
+    <div style="position:absolute; left:76px; top:56px; width:2px; height:24px; background:#14181A"></div>
+    <p class="m" style="position:absolute; left:0px; top:86px; width:160px; text-align:center">1,41</p>
+    <p style="position:absolute; left:-10px; top:120px; width:180px; text-align:center; font-size:26px">paracétamol</p>
+    <div style="position:absolute; left:427px; top:56px; width:2px; height:24px; background:#14181A"></div>
+    <p class="m" style="position:absolute; left:348px; top:86px; width:160px; text-align:center">3,31</p>
+    <p style="position:absolute; left:338px; top:120px; width:180px; text-align:center; font-size:26px">atorvastatine</p>
+  </div>
+</div>
+
+<div class="band a-rise d7" style="align-items:baseline; padding-top:20px">
+  <p class="m" style="font-size:32px; color:#14181A">aptitude = 0,5 × QED + 0,5 × (10 - SA) / 9</p>
+  <span class="grow"></span>
+  <p class="lab">le poids 0,5 est notre choix</p>
+</div>
+
+<div class="mark a-fade d1"><img src="/_blob/3625dc222225be82df21815e93d764fe" alt="EPF Engineering School" style="width:69px; height:56px"></div>
+<p class="rail-top a-fade d1"><span>04 / 15</span><span class="grow"></span><span>Les objectifs</span></p>
+<p class="rail-bot a-fade d9"><span>Les six médicaments tiennent entre SA 1,4 et 3,3</span><span class="grow"></span><span>QED : Bickerton et al., 2012</span><span>SA : Ertl et Schuffenhauer, 2009</span></p>
+
+<aside>Guilherme. Deux notes, toutes deux calculées par RDKit, et qui tirent en sens inverse. Sur la règle du haut, le QED : une agrégation de huit descripteurs physico-chimiques, entre zéro et un. Regardez où tombent les médicaments réels. L'ibuprofène est à 0,822. L'atorvastatine, qui est vendue à des millions de personnes, est à 0,163 : le QED pénalise lourdement les grosses molécules. C'est une ressemblance de profil physique, pas une activité biologique. Le trait bleu, c'est notre meilleur QED généré, 0,739 : nous restons sous l'ibuprofène, et j'y reviendrai. Sur la règle du bas, le SA score : la difficulté de synthèse entre un et dix, estimée sur la fréquence des fragments dans les bases de composés, sans simuler la moindre réaction. Les six médicaments réels tiennent tous entre 1,4 et 3,3, dans le premier tiers : ce sont des molécules qu'on sait fabriquer. Le trait rouge à 6,53, c'est ce que notre optimiseur produit quand on lui retire la contrainte de synthèse. Toute la tension du projet est entre ces deux traits. Pour les combiner, on normalise le SA et on fait une somme pondérée à poids égal, et ce poids de 0,5 est un choix que nous assumons et que nous critiquons nous-mêmes à la fin.</aside>
+</section>
