@@ -68,38 +68,44 @@ Les cinq mutations SELFIES de la diapositive 3 ont ete generees avec
 `selfies 2.1.1` a partir de l'aspirine, et chacune decode bien vers la
 molecule affichee. La cassure SMILES montree a cote vient de la mesure.
 
-## Les 15 diapositives
+## Les 16 diapositives
 
 | # | Titre | Ce qu'elle montre |
 |---|---|---|
 | 1 | Conception evolutionnaire de molecules candidates | couverture |
-| 2 | Pourquoi une recherche evolutionnaire | ni enumeration, ni gradient, deux objectifs opposes |
-| 3 | Une grammaire qui ne casse pas | la meme mutation sur les deux formats : **13,7 % contre 100 %** |
-| 4 | Deux notes qui se contredisent | QED et SA sur deux regles graduees, avec les six medicaments |
-| 5 | La boucle, en cinq etapes | les cinq etapes et la population qui monte |
-| 6 | L'operateur de mutation, en entier | `muter()` en entier : la preuve en code de ce qu'annonce la 3 |
-| 7 | Ce qu'il faut fixer pour pouvoir conclure | budget, graines, lignes de base, verificateur |
-| 8 | A budget egal, sur cinq graines | **0,7163 contre 0,6262**, ecart de 3,4 ecarts-types |
-| 9 | L'effondrement n'a pas eu lieu | la diversite tient, et deux hypotheses testables |
-| 10 | Le front de Pareto | 25 molecules, hypervolume 0,674, medicaments sur le meme plan |
-| 11 | **Face aux medicaments reels** | quatre des six ne sont domines par rien |
-| 12 | **Ce que l'optimiseur a vraiment trouve** | l'octanol gagne ; le QED seul produit du phosphore anionique |
-| 13 | Deux bugs | la molecule vide de RDKit, et le verificateur qui avait raison |
-| 14 | Comment nous avons travaille | repartition, historique Git, documentation, risques |
-| 15 | Reproduire | cinq commandes, plan B versionne, repartition |
+| 2 | Ce que nous allons montrer | le plan dessine comme une chaine carbonee a cinq atomes |
+| 3 | Pourquoi une recherche evolutionnaire | ni enumeration, ni gradient, deux objectifs opposes |
+| 4 | Une grammaire qui ne casse pas | la meme mutation sur les deux formats : **13,7 % contre 100 %** |
+| 5 | Deux notes qui se contredisent | QED et SA sur deux regles graduees, avec les six medicaments |
+| 6 | La boucle, en cinq etapes | les cinq etapes et la population qui monte |
+| 7 | L'operateur de mutation, en entier | `muter()` en entier : la preuve en code de ce qu'annonce la 4 |
+| 8 | Ce qu'il faut fixer pour pouvoir conclure | budget, graines, lignes de base, verificateur |
+| 9 | A budget egal, sur cinq graines | **0,7163 contre 0,6262**, ecart de 3,4 ecarts-types |
+| 10 | L'effondrement n'a pas eu lieu | la diversite tient, et deux hypotheses testables |
+| 11 | Le front de Pareto | 25 molecules, hypervolume 0,674, medicaments sur le meme plan |
+| 12 | **Face aux medicaments reels** | quatre des six ne sont domines par rien |
+| 13 | **Ce que l'optimiseur a vraiment trouve** | l'octanol gagne ; le QED seul produit du phosphore anionique |
+| 14 | Deux bugs | la molecule vide de RDKit, et le verificateur qui avait raison |
+| 15 | Comment nous avons travaille | repartition, historique Git, documentation, risques |
+| 16 | Reproduire | cinq commandes, plan B versionne, repartition |
 
-La diapositive 6 montre `src/operators.py` tel quel, seule la docstring etant
+La diapositive 2 donne le plan avant tout le reste : cinq etapes posees comme
+les atomes d'une chaine carbonee, les liaisons se dessinant l'une apres
+l'autre et un pulse parcourant la chaine. La cinquieme, la critique, est en
+vermillon parce qu'elle compte autant que les quatre autres.
+
+La diapositive 7 montre `src/operators.py` tel quel, seule la docstring etant
 repliee dans la marge. Elle se lit pour ce qui **n'y est pas** : aucun
 `try/except`, aucune verification de validite, aucune boucle de reessai. C'est
-la preuve en code de ce que la diapositive 3 annonce en mesure.
+la preuve en code de ce que la diapositive 4 annonce en mesure.
 
-La diapositive 14 repond au critere Organisation point par point : repartition
+La diapositive 15 repond au critere Organisation point par point : repartition
 du travail, historique Git, documentation et gestion des risques. Elle porte
 aussi la declaration d'usage d'un agent de code, exigee par `AGENTS.md`.
 
 Les travaux cites figurent dans les rails : Krenn et al. 2020 pour SELFIES
-(diapositive 3), Bickerton et al. 2012 pour le QED et Ertl et Schuffenhauer
-2009 pour le SA score (diapositive 4). La liste complete est dans le README
+(diapositive 4), Bickerton et al. 2012 pour le QED et Ertl et Schuffenhauer
+2009 pour le SA score (diapositive 5). La liste complete est dans le README
 du dossier.
 
 Les diapositives 10 et 11 valent souvent plus que la 7 : montrer ou la methode
