@@ -1,0 +1,75 @@
+<section id="ecritures" class="paper sheet" data-transition="fade" style="gap:14px">
+<svg class="a-bloom" aria-label="Forme organique décorative" width="800" height="760" viewBox="0 0 800 760" style="position:absolute; left:1180px; top:360px; width:740px; height:703px"><path d="M430 18 C602 18 764 150 778 340 C792 530 660 690 460 720 C260 750 68 636 28 448 C-12 260 78 92 248 36 C302 18 372 18 430 18 Z" fill="#1D5260" opacity="0.05"/></svg>
+<h2 class="a-rise d1" style="font-size:60px">Une molécule, écrite en une ligne</h2>
+
+<div style="display:flex; align-items:baseline; gap:24px; border-bottom:1px solid #C9C1B0; padding-bottom:8px" class="a-left d2">
+  <p class="lab ver" style="font-size:26px">SMILES</p>
+  <p style="font-size:26px; color:#6A6559">1988 — une syntaxe qu’il faut respecter</p>
+  <span class="grow"></span>
+  <p class="lab ver">une chaîne peut être fausse</p>
+</div>
+
+<div style="display:flex; gap:24px">
+  <div class="col a-rise d3" style="width:300px; gap:4px">
+    <p class="m ver" style="font-size:30px">C &#160; N &#160; O</p>
+    <p style="font-size:27px">un atome</p>
+  </div>
+  <div class="col a-rise d3" style="width:300px; gap:4px">
+    <p class="m ver" style="font-size:30px">C=O &#160; C#N</p>
+    <p style="font-size:27px">= double, # triple</p>
+  </div>
+  <div class="col a-rise d4" style="width:300px; gap:4px">
+    <p class="m ver" style="font-size:30px">CC(C)C</p>
+    <p style="font-size:27px">une ramification</p>
+  </div>
+  <div class="col a-rise d4" style="width:300px; gap:4px">
+    <p class="m ver" style="font-size:30px">C1CCCC1</p>
+    <p style="font-size:27px">un cycle</p>
+  </div>
+  <div class="col a-rise d5" style="width:380px; gap:4px">
+    <p class="m ver" style="font-size:30px">c1ccccc1</p>
+    <p style="font-size:27px">un aromatique</p>
+  </div>
+</div>
+
+<div style="display:flex; align-items:baseline; gap:24px; border-bottom:1px solid #C9C1B0; padding-bottom:8px; margin-top:8px" class="a-left d6">
+  <p class="lab pet" style="font-size:26px">SELFIES</p>
+  <p style="font-size:26px; color:#6A6559">2020 — une machine qui dérive la molécule, symbole après symbole</p>
+  <span class="grow"></span>
+  <p class="lab pet">aucune chaîne ne l’est</p>
+</div>
+
+<div style="display:flex; gap:24px">
+  <div class="col a-rise d7" style="width:380px; gap:4px">
+    <p class="m pet" style="font-size:30px">[C] [N] [O]</p>
+    <p style="font-size:27px">lié par une simple</p>
+  </div>
+  <div class="col a-rise d7" style="width:340px; gap:4px">
+    <p class="m pet" style="font-size:30px">[=C] &#160; [#C]</p>
+    <p style="font-size:27px">double, triple</p>
+  </div>
+  <div class="col a-rise d8" style="width:420px; gap:4px">
+    <p class="m pet" style="font-size:30px">[Branch1]</p>
+    <p style="font-size:27px">ouvre une ramification</p>
+  </div>
+  <div class="col a-rise d8" style="width:420px; gap:4px">
+    <p class="m pet" style="font-size:30px">[Ring1]</p>
+    <p style="font-size:27px">ferme un cycle N atomes plus tôt</p>
+  </div>
+</div>
+
+<p class="a-rise d8" style="font-size:28px; font-style:italic; color:#5B5750">Ni l’un ni l’autre ne porte sa propre taille&#160;: <span class="pet">il la lit dans les symboles qui suivent</span>. C’est de là que vient le mot « autoréférent ».</p>
+
+<div class="a-left d9" style="display:flex; gap:28px; border-top:1px solid #DCD4C3; padding-top:10px">
+  <p class="lab" style="width:236px">les trois règles<br>du décodage</p>
+  <p style="width:446px; font-size:25px; line-height:1.3"><span class="pet" style="font-weight:600">1.</span> Une liaison trop lourde pour la valence restante est <span class="pet">abaissée</span>, jamais refusée.</p>
+  <p style="width:446px; font-size:25px; line-height:1.3"><span class="pet" style="font-weight:600">2.</span> Un cycle qui pointe trop loin est <span class="pet">raccourci</span> au plus ancien atome libre.</p>
+  <p style="width:420px; font-size:25px; line-height:1.3"><span class="pet" style="font-weight:600">3.</span> Une branche qui dépasserait la fin <span class="pet">s’arrête là</span>, le reste est ignoré.</p>
+</div>
+
+<div class="mark a-fade d1"><img src="/_blob/3625dc222225be82df21815e93d764fe" alt="EPF Engineering School" style="width:69px; height:56px"></div>
+<p class="rail-top a-fade d1"><span>03 / 17</span><span class="grow"></span><span>Les deux écritures</span></p>
+<p class="rail-bot a-fade d9"><span class="ver">SMILES : Weininger 1988</span><span class="pet">SELFIES : Krenn et al. 2020</span><span class="grow"></span><span>une ligne de texte, deux grammaires</span></p>
+
+<aside>Guilherme. Une minute de vocabulaire, parce que tout le reste en dépend. En haut, SMILES, l'écriture standard depuis 1988 : les atomes sont des lettres, les liaisons des signes, les branches des parenthèses, les cycles un chiffre qu'on ouvre et qu'on referme avec le même chiffre. C'est lisible — l'aspirine se découpe en groupes fonctionnels qu'un chimiste reconnaît du premier coup d'œil : l'acétyle, le cycle aromatique, l'acide. Mais c'est une syntaxe : les parenthèses doivent s'apparier, les chiffres de cycle doivent se refermer, les valences doivent tomber juste. Une chaîne SMILES peut être fausse. En bas, SELFIES, 2020. Ce n'est plus une syntaxe, c'est une machine qui dérive la molécule symbole après symbole en gardant en mémoire la valence encore disponible. Le point clé est la ligne du milieu : crochet Branch un et crochet Ring un ne portent pas leur propre taille, ils la lisent dans les symboles qui suivent. C'est de là que vient le mot « autoréférent », le S et le F de SELFIES. Du coup trois règles suffisent à rendre le décodage total. Une liaison trop lourde pour la valence restante est abaissée — une triple devient une double — au lieu d'être refusée. Un cycle qui pointe trop loin est raccourci au plus ancien atome disponible. Une branche qui dépasserait la fin de la chaîne s'arrête là, et les symboles qui restent sont ignorés. Conséquence : aucune chaîne SELFIES n'est fausse. Il n'en existe pas. C'est exactement ce que la diapositive suivante mesure.</aside>
+</section>

@@ -32,7 +32,7 @@
 </div>
 
 <div class="mark a-fade d1"><img src="/_blob/3625dc222225be82df21815e93d764fe" alt="EPF Engineering School" style="width:69px; height:56px"></div>
-<p class="rail-top a-fade d1"><span>14 / 16</span><span class="grow"></span><span>Le code</span></p>
+<p class="rail-top a-fade d1"><span>15 / 17</span><span class="grow"></span><span>Le code</span></p>
 <p class="rail-bot a-fade d7"><span>Les deux sont dans l’historique Git, avec le test qui les ferme</span><span class="grow"></span><span>79 tests · 5 fichiers</span></p>
 
 <aside>Guilherme. Deux bugs, parce qu'ils disent quelque chose sur la méthode. Le premier : en RDKit, MolFromSmiles de la chaîne vide ne renvoie pas None. Il renvoie un objet molécule parfaitement valide, mais sans aucun atome. Or une chaîne SELFIES peut être dégénérée : crochet Ring1 tout seul est un symbole de fermeture de cycle sans atome, et il se décode en SMILES vide. Notre contrôle testait « le décodage a-t-il réussi ». Réponse : oui. Donc la molécule vide passait, le calcul de SA renvoyait None, et le TypeError tombait à la troisième génération, pas à la première, ce qui l'a rendu pénible à trouver. La correction tient en une ligne : exiger au moins un atome. Et nous avons écrit huit tests après coup, pas avant : ils verrouillent un défaut réel, pas un cas imaginé. Le second bug est plus intéressant moralement. Le front annonçait 38 entrées pour 25 molécules, et le vérificateur criait 785 problèmes. La tentation évidente, quand on est pressé, c'est d'assouplir le vérificateur. Il avait raison : c'était le notebook qui lui livrait des doublons entre graines. On corrige ce qui est mesuré, pas l'instrument qui mesure.</aside>
